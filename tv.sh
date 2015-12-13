@@ -129,10 +129,10 @@ done
 		showName
 		return
 	elif [ $showNumber = 'a' ] && [ $watch = '-u' ]; then			# TO Shift from "show unwatched" to "show all"
-			$HOME/tv_show/tv.sh
+			$HOME/tv_show-master/tv.sh
 			exit
 	elif [ $showNumber = 'u' ]; then			# To watch unwatched TV shows
-		$HOME/tv_show/tv.sh -u 									# Call tv with "u" as argument for that
+		$HOME/tv_show-master/tv.sh -u 									# Call tv with "u" as argument for that
 		exit
 	elif [ $showNumber -gt $int 2> /dev/null ]; then			# If the entered number is greater than availabale options
 		echo "Enter valid number..."
