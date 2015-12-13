@@ -11,6 +11,10 @@ if [ $watch = '-h' 2> /dev/null ]; then			# Help Page
 	exit
 fi
 
+if [ ! -d $HOME/TVshowLog ]; then			# If the Log directory does not exist, then create one.
+	mkdir "$HOME/TVshowLog"					# Needed for first time only, mostly
+fi
+
 # GENERALISATION
 if [ ! -f $HOME/TVshowLog/location.log ]; then
 	echo "Enter TV show location"
@@ -62,10 +66,6 @@ showName() {
 cd "$tvShow_location"
 
 # CHECK DATABASE
-if [ ! -d $HOME/TVshowLog ]; then			# If the Log directory is not created, then create one.
-	mkdir "$HOME/TVshowLog"					# Needed for first time only, mostly
-fi
-
 for tv in */; do
 	if [ ! -d "$HOME/TVshowLog/$tv" ]; then		# If the directory doesnt exist
 		mkdir "$HOME/TVshowLog/$tv"
