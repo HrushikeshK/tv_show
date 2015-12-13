@@ -550,7 +550,7 @@ setwatchedT() {
 	read showNumber
 
 	if [ $showNumber -ne 0 -o $showNumber -eq 0 2> /dev/null ]; then 			# Check whether entered value is an integer
-		if [ $showNumber -gt $i 2> /dev/null ]; then			# If the entered number is greater than availabale options
+		if [ $showNumber -gt $int 2> /dev/null ]; then			# If the entered number is greater than availabale options
 			echo "Enter valid number..."
 			sleep 1
 			return
