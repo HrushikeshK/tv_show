@@ -42,18 +42,18 @@ clear
 #		sshfs username@ipAddress:"path_to_your_tv_shows_location_on_your_remote_device" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
 #	fi
 # else
-#	echo "${RED} ${BOLD}Problem in connection...${NONE}"
-#	sleep 1
-#	exit
+#		echo "${RED} ${BOLD}Problem in connection...${NONE}"
+#		sleep 1
+#		exit
 # fi
 
 # Else if your TV shows are on this machine
- 	if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
- 		echo "Problem Loading TV shows"
- 		echo "Check whether the specified location contains TV shows and is mounted"
- 		rm "$HOME/TVshowLog/location.log"
- 		exit
- 	fi 
+ if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
+ 	echo "Problem Loading TV shows"
+ 	echo "Check whether the specified location contains TV shows and is mounted"
+ 	rm "$HOME/TVshowLog/location.log"
+ 	exit
+ fi 
 
 showName() {
 
@@ -260,7 +260,7 @@ echo "${PINK}${BOLD} $Dir ${NONE}${YELLOW}$Season: ${NONE}" | tr -d "/"
 for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi' | wc -l)`; do 			# seq command used to get range of number of episodes
 value=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
 
-# TESTING FOR WATCHED EPISODES
+# FOR WATCHED EPISODES
 
 	if [ $watch = '-u' 2> /dev/null ]; then 	# If total number of arguments is one and it is set to u
 		if grep -q "$value" "$HOME/TVshowLog/$Dir$show"; then		# Ignore episodes that are in the log
