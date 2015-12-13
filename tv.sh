@@ -3,9 +3,11 @@ if [ $# -eq 1 ]; then 		# If number of comments is one
 	watch=$1
 fi
 
+ position=$(pwd)
+
 if [ $watch = '-h' 2> /dev/null ]; then			# Help Page
 	clear
-	cat $HOME/tvshow_help
+	cat "$position/tvshow_help"
 	exit
 fi
 
@@ -129,10 +131,10 @@ done
 		showName
 		return
 	elif [ $showNumber = 'a' ] && [ $watch = '-u' ]; then			# TO Shift from "show unwatched" to "show all"
-			$HOME/tv_show-master/tv.sh
+			"$position/tv.sh"
 			exit
 	elif [ $showNumber = 'u' ]; then			# To watch unwatched TV shows
-		$HOME/tv_show-master/tv.sh -u 									# Call tv with "u" as argument for that
+		"$position/tv.sh -u" 									# Call tv with "u" as argument for that
 		exit
 	elif [ $showNumber -gt $int 2> /dev/null ]; then			# If the entered number is greater than availabale options
 		echo "Enter valid number..."
