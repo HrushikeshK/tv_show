@@ -7,7 +7,7 @@ fi
 
 if [ $watch = '-h' 2> /dev/null ]; then			# Help Page
 	clear
-	cat "$position/tvshow_help"
+	cat "$position/tvshow_help.txt"
 	exit
 fi
 
