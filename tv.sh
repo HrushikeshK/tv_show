@@ -53,7 +53,6 @@ clear
 #		exit
 # fi
 
-# Else if your TV shows are on this machine
  if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
  	echo "Problem Loading TV shows"
  	echo "Check whether the specified location contains TV shows and is mounted"
