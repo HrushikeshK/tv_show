@@ -19,6 +19,8 @@ The command "tv -u" displays only episodes that are unwatched.
   TvShow/Show_name/Show_season/Extra_directory/episode.mp4
 
 #### If your tv shows are on the other device which is connected to your LAN and has ssh server running
+* You need to install sshfs utility. To install sshfs, enter :
+  "apt-get install sshfs"
 * You need to uncomment a few lines from the code and enter appropriate details according to your device.
 * You need to create a mount point to mount it virtually. The command sshfs is used to mount virtually.
 * For example: If your remote device is a raspberry pi with ip "192.168.1.101" and username "pi", then the complete command can look like this(example): sshfs pi@192.168.1.101:"/media/pi/MY_HD/TV_shows/" "/mount_point/"
