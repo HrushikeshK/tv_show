@@ -129,7 +129,7 @@ done
 		setwatchedT
 		showName
 		return
-	elif [ $showNumber = 'a' ] && [ $watch = '-u' ]; then			# To Shift from "show unwatched" to "show all"
+	elif [ $showNumber = 'a' ] && [ $watch = '-u' 2> /dev/null ]; then			# To Shift from "show unwatched" to "show all"
 		cd "$position"				# This is required
 		sh "$position/tv.sh"
 		exit
