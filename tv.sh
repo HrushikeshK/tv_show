@@ -50,7 +50,7 @@ clear
 # if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
 #	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
 #		echo "${GREEN} Mounting remote filesystem... ${NONE}"
-#		sshfs pi@192.168.1.100:"/media/pi/Hrushi's HD/Hrushikesh/TV shows/" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
+#		sshfs username@ipAddress:"path_to_your_tv_shows_location_on_your_remote_device" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
 #	fi
 # else
 #		echo "${RED} ${BOLD}Problem in connection...${NONE}"
