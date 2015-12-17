@@ -2,9 +2,7 @@
 if [ $# -eq 1 ]; then 		# If number of comments is one
 	watch=$1
 fi
-
- position=$(pwd)
-
+   
 if [ $watch = '-h' 2> /dev/null ]; then			# Help Page
 	clear
 	cat "$position/tvshow_help.txt"
@@ -15,14 +13,21 @@ if [ ! -d $HOME/TVshowLog ]; then			# If the Log directory does not exist, then 
 	mkdir "$HOME/TVshowLog"					# Needed for first time only, mostly
 fi
 
+
+
 # GENERALISATION
-if [ ! -f $HOME/TVshowLog/location.log ]; then
+if [ ! -f "$HOME/TVshowLog/.location.log" ]; then
+
+	pwd > "$HOME/TVshowLog/.location.log"					# Location of the script file
+	
 	echo "Enter TV show location"
 	read tvShow_location 						# Path where your TV shows are located
-	echo "$tvShow_location" > "$HOME/TVshowLog/location.log"
+	echo "$tvShow_location" >> "$HOME/TVshowLog/.location.log"
 else
-	tvShow_location=$(cat "$HOME/TVshowLog/location.log") 
+	tvShow_location=$(cat "$HOME/TVshowLog/.location.log" | sed -n '2p') 
 fi
+
+	position=$(sed -n '1p' "$HOME/TVshowLog/.location.log")			# Location of the script
 
 # ASCII CODES for foreground colours and text attributes
 NONE='\033[00m'
@@ -42,21 +47,21 @@ clear
 
 # If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment these lines
 
-# if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
-#	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
-#		echo "${GREEN} Mounting remote filesystem... ${NONE}"
-#		sshfs username@ipAddress:"path_to_your_tv_shows_location_on_your_remote_device" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
-#	fi
-# else
-#		echo "${RED} ${BOLD}Problem in connection...${NONE}"
-#		sleep 1
-#		exit
-# fi
+ if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
+	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
+		echo "${GREEN} Mounting remote filesystem... ${NONE}"
+		sshfs pi@192.168.1.100:"/media/pi/Hrushi's HD/Hrushikesh/TV shows/" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
+	fi
+ else
+		echo "${RED} ${BOLD}Problem in connection...${NONE}"
+		sleep 1
+		exit
+ fi
 
  if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
  	echo "Problem Loading TV shows"
  	echo "Check whether the specified location contains TV shows and is mounted"
- 	rm "$HOME/TVshowLog/location.log"
+ 	rm "$HOME/TVshowLog/.location.log"
  	exit
  fi 
 
@@ -69,7 +74,7 @@ for tv in */; do
 	if [ ! -d "$HOME/TVshowLog/$tv" ]; then		# If the directory doesnt exist
 		mkdir "$HOME/TVshowLog/$tv"
 		echo "Database updated with new show named ${BOLD}$(echo $tv | tr -d "/")${NONE}"		# Update with new TV show
-		sleep 1
+		sleep 0.5
 	fi
 	cd "$tv"
 	for season in */; do 
@@ -412,7 +417,7 @@ if [ $epNumber = 'r' ]; then			# RANGE
 			sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show"
 		fi
 		echo "Successfully set $Episode as watched"
-		sleep 1
+		sleep 0.5
 		i=$((i+1))
 	done
 	# INDIVIDUAL
@@ -430,7 +435,7 @@ elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether 
 			sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show"
 		fi
 		echo "Successfully set $Episode as watched"
-		sleep 1
+		sleep 0.5
 	fi
 else
 	return 
@@ -497,7 +502,7 @@ if [ $seasonNumber = 'r' ]; then			# set as watched in RANGE
 
 		sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Season as watched"
-		sleep 1
+		sleep 0.5
 		cd ..
 	done
 	
@@ -523,7 +528,7 @@ elif [ $seasonNumber -ne 0 -o $seasonNumber -eq 0 2> /dev/null ]; then			# Check
 		sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Season as watched"
 		cd ..
-		sleep 1	
+		sleep 0.5	
 	fi
 else
 	return
@@ -574,7 +579,7 @@ setwatchedT() {
 				done
 				sort "$HOME/TVshowLog/$DIR$show" -o "$HOME/TVshowLog/$DIR$show" 	# Sort the log file
 				echo "Successfully set $DIR$j as watched"
-				sleep 1
+				sleep 0.5
 				cd ..
 			done
 			cd ..
