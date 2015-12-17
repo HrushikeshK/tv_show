@@ -47,23 +47,23 @@ clear
 
 # If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment these lines
 
- if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
-	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
-		echo "${GREEN} Mounting remote filesystem... ${NONE}"
-		sshfs pi@192.168.1.100:"/media/pi/Hrushi's HD/Hrushikesh/TV shows/" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
-	fi
- else
-		echo "${RED} ${BOLD}Problem in connection...${NONE}"
-		sleep 1
-		exit
- fi
-
- if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
- 	echo "Problem Loading TV shows"
- 	echo "Check whether the specified location contains TV shows and is mounted"
- 	rm "$HOME/TVshowLog/.location.log"
- 	exit
- fi 
+# if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
+#	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
+#		echo "${GREEN} Mounting remote filesystem... ${NONE}"
+#		sshfs pi@192.168.1.100:"/media/pi/Hrushi's HD/Hrushikesh/TV shows/" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
+#	fi
+# else
+#		echo "${RED} ${BOLD}Problem in connection...${NONE}"
+#		sleep 1
+#		exit
+# fi
+#
+# if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
+# 	echo "Problem Loading TV shows"
+# 	echo "Check whether the specified location contains TV shows and is mounted"
+# 	rm "$HOME/TVshowLog/.location.log"
+# 	exit
+# fi 
 
 showName() {
 
