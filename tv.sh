@@ -20,11 +20,19 @@ if [ ! -f "$HOME/TVshowLog/.location.log" ]; then
 
 	pwd > "$HOME/TVshowLog/.location.log"					# Location of the script file
 	
-	echo "Enter TV show location"
+	echo "Enter path for your TV shows directory"
 	read tvShow_location 						# Path where your TV shows are located
 	echo "$tvShow_location" >> "$HOME/TVshowLog/.location.log"
 else
-	tvShow_location=$(cat "$HOME/TVshowLog/.location.log" | sed -n '2p') 
+	if [ $(cat "$HOME/TVshowLog/.location.log" | wc -l) -ne 2 ]; then
+		pwd > "$HOME/TVshowLog/.location.log"					# Location of the script file
+	
+		echo "Enter path for your TV shows directory"
+		read tvShow_location 						# Path where your TV shows are located
+		echo "$tvShow_location" >> "$HOME/TVshowLog/.location.log"
+	else
+		tvShow_location=$(cat "$HOME/TVshowLog/.location.log" | sed -n '2p') 
+	fi
 fi
 
 	position=$(sed -n '1p' "$HOME/TVshowLog/.location.log")			# Location of the script
@@ -57,13 +65,13 @@ clear
 #		sleep 1
 #		exit
 # fi
-#
-# if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
-# 	echo "Problem Loading TV shows"
-# 	echo "Check whether the specified location contains TV shows and is mounted"
-# 	rm "$HOME/TVshowLog/.location.log"
-# 	exit
-# fi 
+
+ if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
+ 	echo "Problem Loading TV shows"
+ 	echo "Check whether the specified location contains TV shows and is mounted"
+ 	rm "$HOME/TVshowLog/.location.log"
+ 	exit
+ fi 
 
 showName() {
 
