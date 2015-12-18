@@ -182,7 +182,6 @@ clear		# Command to clear screen
 echo "${PINK}${BOLD} $DIR: ${NONE}" | tr -d "/"
 count=0
 
-# TESTING 
 if [ $watch = '-u' 2> /dev/null ]; then			# IF argument is passed
 	for int in */; do 
 	count=$((count+1))
@@ -331,7 +330,7 @@ elif [ $epNumber = 'r' ]; then				# Generate Random Number
 	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $random | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null			#Play Random episode using vlc
-	# TESTING
+	
 	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
@@ -357,7 +356,7 @@ elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether 
 	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $epNumber | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null				#Play episode using vlc in full screen
-	# TESTING
+
 	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
@@ -597,7 +596,7 @@ setwatchedT() {
 	fi
 }
 
-# A function which will return boolean value after checking whether all episodes of this season is watched
+
 iswatched() {
 
 	Dir=$1								# TV show name
@@ -608,10 +607,10 @@ iswatched() {
 	value=$(ls | grep -E '*.mp4|*.mkv|*.avi' | wc -l)
 	if [ $(cat "$HOME/TVshowLog/$Dir$show" | wc -l) -eq $value ]; then	# If all episodes are in the entry
 		cd ..
-		return 0
+		return 0	# All are watched
 	else
 		cd ..
-		return 1
+		return 1	# Not all are watched
 	fi
 
 }
@@ -626,7 +625,7 @@ iswatchedS() {
 	lines=$(ls "$season" | grep -E '*.mp4|*.mkv|*.avi' | wc -l)				# Seasons in actual TV show directory
 		if [ ! $(cat "$HOME/TVshowLog/$Dir$show" | wc -l) -eq $lines ]; then		# compared with number of episodes in the log list
 			cd ..
-			return 1		
+			return 1	# Not all are watched	
 		fi
 	done
 
