@@ -2,40 +2,42 @@
 if [ $# -eq 1 ]; then 		# If number of comments is one
 	watch=$1
 fi
-   
+
+if [ ! -d $HOME/.TVshowLog ]; then			# If the Log directory does not exist, then create one.
+	mkdir "$HOME/.TVshowLog"					# Needed for first time only, mostly
+fi
+
+if [ ! -f $HOME/.TVshowLog/.help.txt ]; then
+	cp "tvshow_help.txt" "$HOME/.TVshowLog/.help.txt"		# Copy the help file in Log folder
+fi
+
 if [ $watch = '-h' 2> /dev/null ]; then			# Help Page
 	clear
-	cat "$position/tvshow_help.txt"
+	cat "$HOME/.TVshowLog/.help.txt"
 	exit
 fi
 
-if [ ! -d $HOME/TVshowLog ]; then			# If the Log directory does not exist, then create one.
-	mkdir "$HOME/TVshowLog"					# Needed for first time only, mostly
-fi
-
-
-
 # GENERALISATION
-if [ ! -f "$HOME/TVshowLog/.location.log" ]; then
+if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 
-	pwd > "$HOME/TVshowLog/.location.log"					# Location of the script file
+	pwd > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 	echo "Enter path for your TV shows directory"
 	read tvShow_location 						# Path where your TV shows are located
-	echo "$tvShow_location" >> "$HOME/TVshowLog/.location.log"
+	echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
 else
-	if [ $(cat "$HOME/TVshowLog/.location.log" | wc -l) -ne 2 ]; then
-		pwd > "$HOME/TVshowLog/.location.log"					# Location of the script file
+	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 2 ]; then
+			pwd > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 		echo "Enter path for your TV shows directory"
 		read tvShow_location 						# Path where your TV shows are located
-		echo "$tvShow_location" >> "$HOME/TVshowLog/.location.log"
+		echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
 	else
-		tvShow_location=$(cat "$HOME/TVshowLog/.location.log" | sed -n '2p') 
+		tvShow_location=$(cat "$HOME/.TVshowLog/.location.log" | sed -n '2p') 
 	fi
 fi
 
-	position=$(sed -n '1p' "$HOME/TVshowLog/.location.log")			# Location of the script
+	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
 
 # ASCII CODES for foreground colours and text attributes
 NONE='\033[00m'
@@ -55,21 +57,21 @@ clear
 
 # If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment these lines
 
-# if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
-#	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
-#		echo "${GREEN} Mounting remote filesystem... ${NONE}"
-#		sshfs username@ipAddress:"path_to_your_tv_shows_location_on_your_remote_device" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
-#	fi
-# else
-#		echo "${RED} ${BOLD}Problem in connection...${NONE}"
-#		sleep 1
-#		exit
-# fi
+ if ping -c 1 192.168.1.101 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
+	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
+		echo "${GREEN} Mounting remote filesystem... ${NONE}"
+		sshfs pi@192.168.1.101:"/media/pi/Hrushi's HD/Hrushikesh/TV shows/" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
+	fi
+ else
+		echo "${RED} ${BOLD}Problem in connection...${NONE}"
+		sleep 1
+		exit
+ fi
 
  if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
  	echo "Problem Loading TV shows"
  	echo "Check whether the specified location contains TV shows and is mounted"
- 	rm "$HOME/TVshowLog/.location.log"
+ 	rm "$HOME/.TVshowLog/.location.log"
  	exit
  fi 
 
@@ -79,16 +81,16 @@ cd "$tvShow_location"
 
 # CHECK DATABASE
 for tv in */; do
-	if [ ! -d "$HOME/TVshowLog/$tv" ]; then		# If the directory doesnt exist
-		mkdir "$HOME/TVshowLog/$tv"
+	if [ ! -d "$HOME/.TVshowLog/$tv" ]; then		# If the directory doesnt exist
+		mkdir "$HOME/.TVshowLog/$tv"
 		echo "Database updated with new show named ${BOLD}$(echo $tv | tr -d "/")${NONE}"		# Update with new TV show
 		sleep 0.5
 	fi
 	cd "$tv"
 	for season in */; do 
 		show=$(echo "$season" | tr -d "/")
-		if [ ! -f "$HOME/TVshowLog/$tv$show" ]; then		# If the log file does not exist in the database
-			touch "$HOME/TVshowLog/$tv$show"
+		if [ ! -f "$HOME/.TVshowLog/$tv$show" ]; then		# If the log file does not exist in the database
+			touch "$HOME/.TVshowLog/$tv$show"
 		fi
 	done
 	cd ..
@@ -182,6 +184,7 @@ clear		# Command to clear screen
 echo "${PINK}${BOLD} $DIR: ${NONE}" | tr -d "/"
 count=0
 
+# TESTING 
 if [ $watch = '-u' 2> /dev/null ]; then			# IF argument is passed
 	for int in */; do 
 	count=$((count+1))
@@ -278,7 +281,7 @@ value=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
 # FOR WATCHED EPISODES
 
 	if [ $watch = '-u' 2> /dev/null ]; then 	# If total number of arguments is one and it is set to u
-		if grep -q "$value" "$HOME/TVshowLog/$Dir$show"; then		# Ignore episodes that are in the log
+		if grep -q "$value" "$HOME/.TVshowLog/$Dir$show"; then		# Ignore episodes that are in the log
 			continue
 		else
 			if [ $i -lt 10 ]; then
@@ -330,16 +333,16 @@ elif [ $epNumber = 'r' ]; then				# Generate Random Number
 	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $random | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null			#Play Random episode using vlc
-	
+	# TESTING
 	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
 	if [ $answer = 'y' ]; then 
-		if grep -q "$Episode" "$HOME/TVshowLog/$Dir$show"; then		# Does not repeat the entries in log file
+		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then		# Does not repeat the entries in log file
 			continue
 		else
-			echo "$Episode" >> "$HOME/TVshowLog/$Dir$show"			# Add the entry of the episode to watched list
-			sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show"
+			echo "$Episode" >> "$HOME/.TVshowLog/$Dir$show"			# Add the entry of the episode to watched list
+			sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show"
 			echo "Successfully set $Episode as watched"
 			sleep 1
 		fi
@@ -356,16 +359,16 @@ elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether 
 	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $epNumber | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null				#Play episode using vlc in full screen
-
+	# TESTING
 	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
 	if [ $answer = 'y' ]; then 
-		if grep -q "$Episode" "$HOME/TVshowLog/$Dir$show"; then	# Does not repeat the entries in log file
+		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then	# Does not repeat the entries in log file
 			continue
 		else
-			echo "$Episode" >> "$HOME/TVshowLog/$Dir$show"			# Add the entry of the episode to watched list
-			sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show" 	# Sort log file
+			echo "$Episode" >> "$HOME/.TVshowLog/$Dir$show"			# Add the entry of the episode to watched list
+			sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 			echo "Successfully set $Episode as watched"
 			sleep 1
 		fi
@@ -393,7 +396,7 @@ setwatchedE() {
 
 	for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi' | wc -l)`; do 			# seq command used to get range of number of episodes
 value=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
-		if grep -q "$value" "$HOME/TVshowLog/$Dir$show"; then		# Display unwatched episodes only
+		if grep -q "$value" "$HOME/.TVshowLog/$Dir$show"; then		# Display unwatched episodes only
 			continue
 		else
 			if [ $i -lt 10 ]; then
@@ -417,11 +420,11 @@ if [ $epNumber = 'r' ]; then			# RANGE
 	# RANGE
 	while [ $i -le $secondNumber ]; do
 		Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
-		if grep -q "$Episode" "$HOME/TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
+		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
 			continue
 		else
-			echo "$Episode" >> "$HOME/TVshowLog/$Dir$show"
-			sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show"
+			echo "$Episode" >> "$HOME/.TVshowLog/$Dir$show"
+			sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show"
 		fi
 		echo "Successfully set $Episode as watched"
 		sleep 0.5
@@ -435,11 +438,11 @@ elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether 
 		return
 	else
 		Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $epNumber | tail -n 1`
-		if grep -q "$Episode" "$HOME/TVshowLog/$Dir$show"; then		 # If the episode is already in the log then ignore
+		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then		 # If the episode is already in the log then ignore
 			continue
 		else
-			echo "$Episode" >> "$HOME/TVshowLog/$Dir$show"
-			sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show"
+			echo "$Episode" >> "$HOME/.TVshowLog/$Dir$show"
+			sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show"
 		fi
 		echo "Successfully set $Episode as watched"
 		sleep 0.5
@@ -500,14 +503,14 @@ if [ $seasonNumber = 'r' ]; then			# set as watched in RANGE
 
 		for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi' | wc -l)`; do 			# seq command used to get range of number of episodes
 			value=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
-			if grep -q "$value" "$HOME/TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
+			if grep -q "$value" "$HOME/.TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
 				continue
 			else
-				echo "$value" >> "$HOME/TVshowLog/$Dir$show"			# Else add in the log list
+				echo "$value" >> "$HOME/.TVshowLog/$Dir$show"			# Else add in the log list
 			fi
 		done
 
-		sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show" 	# Sort log file
+		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Season as watched"
 		sleep 0.5
 		cd ..
@@ -526,13 +529,13 @@ elif [ $seasonNumber -ne 0 -o $seasonNumber -eq 0 2> /dev/null ]; then			# Check
 
 		for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi' | wc -l)`; do 			# seq command used to get range of number of episodes
 			value=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
-			if grep -q "$value" "$HOME/TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
+			if grep -q "$value" "$HOME/.TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
 				continue
 			else
-				echo "$value" >> "$HOME/TVshowLog/$Dir$show"			# Else add in the log list
+				echo "$value" >> "$HOME/.TVshowLog/$Dir$show"			# Else add in the log list
 			fi
 		done
-		sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show" 	# Sort log file
+		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Season as watched"
 		cd ..
 		sleep 0.5	
@@ -578,13 +581,13 @@ setwatchedT() {
 				show=$(echo "$j" | tr -d "/")				# TO remove / from Season name
 				for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi' | wc -l)`; do 			# seq command used to get range of number of episodes
 					value=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
-					if grep -q "$value" "$HOME/TVshowLog/$DIR$show"; then		# If the episode is already in the log then ignore
+					if grep -q "$value" "$HOME/.TVshowLog/$DIR$show"; then		# If the episode is already in the log then ignore
 						continue
 					else
-						echo "$value" >> "$HOME/TVshowLog/$DIR$show"			# Else add in the log list
+						echo "$value" >> "$HOME/.TVshowLog/$DIR$show"			# Else add in the log list
 					fi
 				done
-				sort "$HOME/TVshowLog/$DIR$show" -o "$HOME/TVshowLog/$DIR$show" 	# Sort the log file
+				sort "$HOME/.TVshowLog/$DIR$show" -o "$HOME/.TVshowLog/$DIR$show" 	# Sort the log file
 				echo "Successfully set $DIR$j as watched"
 				sleep 0.5
 				cd ..
@@ -596,7 +599,7 @@ setwatchedT() {
 	fi
 }
 
-
+# A function which will return boolean value after checking whether all episodes of this season is watched
 iswatched() {
 
 	Dir=$1								# TV show name
@@ -605,12 +608,12 @@ iswatched() {
 	show=$(echo "$Season" | tr -d "/")
 
 	value=$(ls | grep -E '*.mp4|*.mkv|*.avi' | wc -l)
-	if [ $(cat "$HOME/TVshowLog/$Dir$show" | wc -l) -eq $value ]; then	# If all episodes are in the entry
+	if [ $(cat "$HOME/.TVshowLog/$Dir$show" | wc -l) -eq $value ]; then	# If all episodes are in the entry
 		cd ..
-		return 0	# All are watched
+		return 0
 	else
 		cd ..
-		return 1	# Not all are watched
+		return 1
 	fi
 
 }
@@ -623,9 +626,9 @@ iswatchedS() {
 		 				
 	show=$(echo "$season" | tr -d "/")
 	lines=$(ls "$season" | grep -E '*.mp4|*.mkv|*.avi' | wc -l)				# Seasons in actual TV show directory
-		if [ ! $(cat "$HOME/TVshowLog/$Dir$show" | wc -l) -eq $lines ]; then		# compared with number of episodes in the log list
+		if [ ! $(cat "$HOME/.TVshowLog/$Dir$show" | wc -l) -eq $lines ]; then		# compared with number of episodes in the log list
 			cd ..
-			return 1	# Not all are watched	
+			return 1		
 		fi
 	done
 
@@ -645,7 +648,7 @@ setunwatchedE() {
 
 	for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi' | wc -l)`; do 			# seq command used to get range of number of episodes
 value=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
-		if grep -q "$value" "$HOME/TVshowLog/$Dir$show"; then		# Display unwatched episodes only
+		if grep -q "$value" "$HOME/.TVshowLog/$Dir$show"; then		# Display unwatched episodes only
 			if [ $i -lt 10 ]; then
 				echo " $i. $value"			#Print Episodes before 10
 			else
@@ -674,8 +677,8 @@ if [ $epNumber = 'r' ]; then
 	while [ $firstNumber -le $secondNumber ]; do
 		Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $firstNumber | tail -n 1`
 		firstNumber=$((firstNumber+1))										# increment number
-		sed -i /"$Episode"/d "$HOME/TVshowLog/$Dir$show"				# Delete the entry from log
-		sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show" 	# Sort log file
+		sed -i /"$Episode"/d "$HOME/.TVshowLog/$Dir$show"				# Delete the entry from log
+		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Episode as UNWATCHED"
 		sleep 1
 	done
@@ -689,8 +692,8 @@ if [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether en
 		return
 	else
 		Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $epNumber | tail -n 1`
-		sed -i /"$Episode"/d "$HOME/TVshowLog/$Dir$show"				# Delete the entry from log
-		sort "$HOME/TVshowLog/$Dir$show" -o "$HOME/TVshowLog/$Dir$show" 	# Sort log file
+		sed -i /"$Episode"/d "$HOME/.TVshowLog/$Dir$show"				# Delete the entry from log
+		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Episode as UNWATCHED"
 		sleep 1
 	fi
