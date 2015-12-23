@@ -57,16 +57,16 @@ clear
 
 # If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment these lines
 
- if ping -c 1 192.168.1.101 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
-	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
-		echo "${GREEN} Mounting remote filesystem... ${NONE}"
-		sshfs pi@192.168.1.101:"/media/pi/Hrushi's HD/Hrushikesh/TV shows/" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
-	fi
- else
-		echo "${RED} ${BOLD}Problem in connection...${NONE}"
-		sleep 1
-		exit
- fi
+# if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
+#	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
+#		echo "${GREEN} Mounting remote filesystem... ${NONE}"
+#		sshfs username@ipAddress:"path_to_your_tv_shows_location_on_your_remote_device" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
+#	fi
+# else
+#		echo "${RED} ${BOLD}Problem in connection...${NONE}"
+#		sleep 1
+#		exit
+# fi
 
  if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
  	echo "Problem Loading TV shows"
@@ -184,7 +184,6 @@ clear		# Command to clear screen
 echo "${PINK}${BOLD} $DIR: ${NONE}" | tr -d "/"
 count=0
 
-# TESTING 
 if [ $watch = '-u' 2> /dev/null ]; then			# IF argument is passed
 	for int in */; do 
 	count=$((count+1))
@@ -333,7 +332,7 @@ elif [ $epNumber = 'r' ]; then				# Generate Random Number
 	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $random | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null			#Play Random episode using vlc
-	# TESTING
+
 	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
@@ -359,7 +358,7 @@ elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether 
 	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $epNumber | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null				#Play episode using vlc in full screen
-	# TESTING
+
 	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
@@ -599,7 +598,6 @@ setwatchedT() {
 	fi
 }
 
-# A function which will return boolean value after checking whether all episodes of this season is watched
 iswatched() {
 
 	Dir=$1								# TV show name
