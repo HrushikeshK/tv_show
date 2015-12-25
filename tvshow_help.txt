@@ -15,24 +15,29 @@ OPTIONS:
 
 
 1. While selecting a TV show:
+
+h - display help
 s - set a particular tv show as watched
 u - watch unwatched tv shows i.e. similar to "tv -u"
 a - to shift to show all mode from "show watched" mode
 q - quit
 
 2. While selecting a Season of a particular TV show
+
 b - go back to select a TV show name
 s - set a particular season as watched
 r - select a random season
 q - quit
 
 3. While selecting an Episode
+
 b - go back to Seasons sections
 s - set a particular episode as watched
 r - select a random episode to watch
 u - set a particular episode as unwatched
-	r - set a range of episodes as unwatched
+r (after pressing u) - set a range of episodes as unwatched
 q - quit
 
 4. After selecting "s" from either Seasons section or Episodes section
+
 r - to set a range of Seasons or Episodes as watched
