@@ -136,6 +136,14 @@ done
 		sleep 1
 		showName
 		return
+	elif [ $showNumber = 'h' ]; then		# Display Help
+		clear
+		cat "$HOME/.TVshowLog/.help.txt"
+		echo "${bold}${RED}Press any key to exit ${NONE}"
+		read enter
+		cd "$position"				# This is required
+		sh "$position/tv.sh"
+		exit
 	elif [ $showNumber = 'quit' ] || [ $showNumber = 'q' ]; then			# Quit
 		for i in T h a n k "-" Y o u; do echo -n $i; sleep 0.10; done; echo; sleep 0.2
 		clear
