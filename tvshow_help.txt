@@ -18,8 +18,8 @@ OPTIONS:
 
 h - display help
 s - set a particular tv show as watched
-u - watch unwatched tv shows i.e. similar to "tv -u"
-a - to shift to show all mode from "show watched" mode
+u - display unwatched tv shows i.e. similar to "tv -u"
+a - display all shows if you are in "show unwatched" mode
 q - quit
 
 2. While selecting a Season of a particular TV show
