@@ -125,6 +125,7 @@ done
 				else
 					echo "Invalid Number..."
 					sleep 0.5
+					clear
 				fi
 		fi
 	fi
