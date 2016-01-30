@@ -1,6 +1,11 @@
 #!/bin/sh
-if [ $# -eq 1 ]; then 		# If number of comments is one
-	watch=$1
+if [ $# -ge 1 ]; then 		# If number of comments is one
+	if [ $# -eq 2 ]; then
+		watch=$1
+		name=$2		# The name which we have to search for 
+	else
+		watch=$1
+	fi
 fi
 
 if [ ! -d $HOME/.TVshowLog ]; then			# If the Log directory does not exist, then create one.
@@ -97,6 +102,32 @@ for tv in */; do
 done
 
 	clear		# Command to clear screen
+	
+# This if statement is used to check whether the user is searching for a tv show
+	
+	if [ $# -eq 1 ]; then		# If only one argument is passed to this function
+		if [ "$(ls | grep -i "$name" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
+			DIR="$(ls | grep -i $name)"
+			cd "$(ls | grep -i $name)"
+			showSeason "$DIR"
+			return
+		else 			# If more than one shows with that expression exist
+			for i in `seq 1 $(ls | grep -i $name | wc -l)`; do
+				echo "$i. $(ls | grep -i $name | head -n $i | tail -n 1)"
+			done
+				echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n" 
+				read num
+				if [ $num -ne 0 -o $num -eq 0 2> /dev/null ]; then
+					DIR="$(ls | grep -i $name | head -n $num | tail -n 1)"
+					cd "$DIR"
+					showSeason "$DIR"
+					return
+				else
+					echo "Invalid Number..."
+					sleep 0.5
+				fi
+		fi
+	fi
 
 	echo "${RED} ${BOLD} TV Shows: ${NONE}"		# Red colour
 	int=0
@@ -152,6 +183,31 @@ done
 		setwatchedT
 		showName
 		return
+	elif [ $showNumber = 'search' ]; then		# If the user wants to search using a keyword
+		echo "${GREEN}Enter a keyword to search ${NONE}"
+		read tname
+
+		if [ "$(ls | grep -i "$tname" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
+			DIR="$(ls | grep -i $tname)"
+			cd "$(ls | grep -i $tname)"
+			showSeason "$DIR"
+			return
+		else 			# If more than one shows with that expression exist
+			for i in `seq 1 $(ls | grep -i $tname | wc -l)`; do
+				echo "$i. $(ls | grep -i $tname | head -n $i | tail -n 1)"
+			done
+				echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n" 
+				read num
+				if [ $num -ne 0 -o $num -eq 0 2> /dev/null ]; then
+					DIR="$(ls | grep -i $tname | head -n $num | tail -n 1)"
+					cd "$DIR"
+					showSeason "$DIR"
+					return
+				else
+					echo "Invalid Number..."
+					sleep 0.5
+				fi
+		fi
 	elif [ $showNumber = 'a' ] && [ $watch = '-u' 2> /dev/null ]; then			# To Shift from "show unwatched" to "show all"
 		cd "$position"				# This is required
 		sh "$position/tv.sh"
@@ -711,7 +767,15 @@ fi
 
 # Main starts here
 
-showName	#function call
+if [ $# -ne 0 ]; then
+	if [ $watch = '--name' 2> /dev/null ] || [ $watch = '-n' ]; then
+		showName -n 		#function call
+	else
+		showName
+	fi
+else 
+	showName
+fi
 
 tput sgr0		# Resets all color changes made in terminal
 exit
