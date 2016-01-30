@@ -12,6 +12,7 @@ DESCRIPTION:
 OPTIONS:
 	The command "tv" displays all episodes.
 	The command "tv -u" displays only episodes that are unwatched.
+	The command "tv -name" or "tv --name" followed by the keyword can be used to display tv shows having having that 		keyword
 
 
 1. While selecting a TV show:
@@ -21,6 +22,7 @@ s - set a particular tv show as watched
 u - display unwatched tv shows i.e. similar to "tv -u"
 a - display all shows if you are in "show unwatched" mode
 q - quit
+search - used to search a tv show name by the keyword
 
 2. While selecting a Season of a particular TV show
 
