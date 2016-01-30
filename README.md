@@ -5,6 +5,8 @@ The command "tv" displays all episodes.
 
 The command "tv -u" displays only episodes that are unwatched.
 
+The command "tv -name" or "tv --name" followed by the keyword can be used to display tv shows having having that keyword
+
 * Make tv.sh an executable using chmod command.
 * Create an alias for "sh /path/to/tv.sh" and you are good to go to use tv.sh from any location on terminal.
 
