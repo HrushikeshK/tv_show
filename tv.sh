@@ -206,6 +206,7 @@ done
 				else
 					echo "Invalid Number..."
 					sleep 0.5
+					showName
 				fi
 		fi
 	elif [ $showNumber = 'a' ] && [ $watch = '-u' 2> /dev/null ]; then			# To Shift from "show unwatched" to "show all"
