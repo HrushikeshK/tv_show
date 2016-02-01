@@ -1,8 +1,13 @@
 #!/bin/sh
+
 if [ $# -ge 1 ]; then 		# If number of comments is one
 	if [ $# -eq 2 ]; then
 		watch=$1
 		name=$2		# The name which we have to search for 
+	elif [ $# -eq 3 ]; then
+		watch=$1
+		arg2=$2
+		name=$3
 	else
 		watch=$1
 	fi
@@ -102,9 +107,8 @@ for tv in */; do
 done
 
 	clear		# Command to clear screen
-	
-# This if statement is used to check whether the user is searching for a tv show
-	
+
+# If -n or --nmae parameter is passed to the program
 	if [ $# -eq 1 ]; then		# If only one argument is passed to this function
 		if [ "$(ls | grep -i "$name" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
 			DIR="$(ls | grep -i $name)"
@@ -125,10 +129,51 @@ done
 				else
 					echo "Invalid Number..."
 					sleep 0.5
-					clear
 				fi
 		fi
 	fi
+
+# If -u -n parameters are passed to the program
+	if [ $# -eq 2 ]; then		# If user wants to check only unwatched seasons of specified keyword
+		if [ "$(ls | grep -i "$name" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
+			DIR="$(ls | grep -i $name)"
+			cd "$(ls | grep -i $name)"
+			iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
+			if [ $? -ne 1 ]; then  	# If this tv show is completely watched
+				echo "Woah! You have watched $DIR completely..."
+				echo "Press Enter key to continue"
+				read enter
+				clear
+			else 
+				showSeason "$DIR/"
+				return
+			fi
+		else 			# If more than one shows with that expression exist
+			for i in `seq 1 $(ls | grep -i $name | wc -l)`; do
+				echo "$i. $(ls | grep -i $name | head -n $i | tail -n 1)"
+			done
+				echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n" 
+				read num
+				if [ $num -ne 0 -o $num -eq 0 2> /dev/null ]; then		# To check that num is a actually a number
+					DIR="$(ls | grep -i $name | head -n $num | tail -n 1)"
+					cd "$DIR"
+					iswatchedS "$DIR/"		# Function call to check whether selected tv show is watched
+					if [ $? -ne 1 ]; then		# If the selected TV show is completely watched
+						echo "Woah! You have watched $DIR completely..."
+						echo "Press Enter key to continue" 
+						read enter
+						clear
+					else
+						showSeason "$DIR/"
+						return
+					fi
+				else
+					echo "Invalid Number..."
+					sleep 0.5
+				fi
+		fi
+	fi
+
 
 	echo "${RED} ${BOLD} TV Shows: ${NONE}"		# Red colour
 	int=0
@@ -168,7 +213,7 @@ done
 		sleep 1
 		showName
 		return
-	elif [ $showNumber = 'h' ]; then		# Display Help
+	elif [ $showNumber = 'h' ]; then
 		clear
 		cat "$HOME/.TVshowLog/.help.txt"
 		echo "${bold}${RED}Press any key to exit ${NONE}"
@@ -176,6 +221,7 @@ done
 		cd "$position"				# This is required
 		sh "$position/tv.sh"
 		exit
+		
 	elif [ $showNumber = 'quit' ] || [ $showNumber = 'q' ]; then			# Quit
 		for i in T h a n k "-" Y o u; do echo -n $i; sleep 0.10; done; echo; sleep 0.2
 		clear
@@ -184,15 +230,25 @@ done
 		setwatchedT
 		showName
 		return
-	elif [ $showNumber = 'search' ]; then		# If the user wants to search using a keyword
+
+
+	elif [ $showNumber = 'search' ]; then
 		echo "${GREEN}Enter a keyword to search ${NONE}"
 		read tname
 
 		if [ "$(ls | grep -i "$tname" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
 			DIR="$(ls | grep -i $tname)"
 			cd "$(ls | grep -i $tname)"
-			showSeason "$DIR"
-			return
+			iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
+			if [ $? -ne 1 ]; then  	# If this tv show is completely watched
+				echo "Woah! You have watched $DIR completely..."
+				echo "Press Enter key to continue"
+				read enter
+				showName
+			else 
+				showSeason "$DIR/"
+				return
+			fi
 		else 			# If more than one shows with that expression exist
 			for i in `seq 1 $(ls | grep -i $tname | wc -l)`; do
 				echo "$i. $(ls | grep -i $tname | head -n $i | tail -n 1)"
@@ -202,14 +258,24 @@ done
 				if [ $num -ne 0 -o $num -eq 0 2> /dev/null ]; then
 					DIR="$(ls | grep -i $tname | head -n $num | tail -n 1)"
 					cd "$DIR"
-					showSeason "$DIR"
-					return
+					iswatchedS "$DIR/"		# Function call to check whether selected tv show is watched
+					if [ $? -ne 1 ]; then		# If the selected TV show is completely watched
+						echo "Woah! You have watched $DIR completely..."
+						echo "Press Enter key to continue"
+						read enter
+						showName
+					else
+						showSeason "$DIR/"
+						return
+					fi
 				else
 					echo "Invalid Number..."
 					sleep 0.5
 					showName
 				fi
 		fi
+
+
 	elif [ $showNumber = 'a' ] && [ $watch = '-u' 2> /dev/null ]; then			# To Shift from "show unwatched" to "show all"
 		cd "$position"				# This is required
 		sh "$position/tv.sh"
@@ -250,6 +316,7 @@ clear		# Command to clear screen
 echo "${PINK}${BOLD} $DIR: ${NONE}" | tr -d "/"
 count=0
 
+# TESTING 
 if [ $watch = '-u' 2> /dev/null ]; then			# IF argument is passed
 	for int in */; do 
 	count=$((count+1))
@@ -398,7 +465,8 @@ elif [ $epNumber = 'r' ]; then				# Generate Random Number
 	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $random | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null			#Play Random episode using vlc
-
+	
+	# Ask whether current episode is watched
 	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
@@ -424,7 +492,8 @@ elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether 
 	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $epNumber | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null				#Play episode using vlc in full screen
-
+	
+	# Ask whetehr current episode is watched
 	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
@@ -664,6 +733,7 @@ setwatchedT() {
 	fi
 }
 
+# A function which will return boolean value after checking whether all episodes of this season is watched
 iswatched() {
 
 	Dir=$1								# TV show name
@@ -769,9 +839,11 @@ fi
 
 # Main starts here
 
-if [ $# -ne 0 ]; then
-	if [ $watch = '--name' 2> /dev/null ] || [ $watch = '-n' ]; then
-		showName -n 		#function call
+if [ $# -ne 0 ]; then		# If number of parameters is not zero
+	if [ $watch = '--name' 2> /dev/null ] || [ $watch = '-n' 2> /dev/null ]; then
+		showName $watch 		#function call
+	elif [ $arg2 = '-n' 2> /dev/null ]; then
+			showName $watch $name 	# If 2 parameters 
 	else
 		showName
 	fi
