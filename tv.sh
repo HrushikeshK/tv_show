@@ -137,7 +137,7 @@ done
 	if [ $# -eq 2 ]; then		# If user wants to check only unwatched seasons of specified keyword
 		if [ "$(ls | grep -i "$name" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
 			DIR="$(ls | grep -i $name)"
-			cd "$(ls | grep -i $name)"
+			cd "$DIR"
 			iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
 			if [ $? -ne 1 ]; then  	# If this tv show is completely watched
 				echo "Woah! You have watched $DIR completely..."
@@ -145,6 +145,7 @@ done
 				read enter
 				clear
 			else 
+				cd "$DIR"
 				showSeason "$DIR/"
 				return
 			fi
@@ -164,6 +165,7 @@ done
 						read enter
 						clear
 					else
+						cd "$DIR"
 						showSeason "$DIR/"
 						return
 					fi
@@ -238,7 +240,7 @@ done
 
 		if [ "$(ls | grep -i "$tname" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
 			DIR="$(ls | grep -i $tname)"
-			cd "$(ls | grep -i $tname)"
+			cd "$DIR"
 			iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
 			if [ $? -ne 1 ]; then  	# If this tv show is completely watched
 				echo "Woah! You have watched $DIR completely..."
@@ -246,6 +248,7 @@ done
 				read enter
 				showName
 			else 
+				cd "$DIR"
 				showSeason "$DIR/"
 				return
 			fi
@@ -265,6 +268,7 @@ done
 						read enter
 						showName
 					else
+						cd "$DIR"
 						showSeason "$DIR/"
 						return
 					fi
