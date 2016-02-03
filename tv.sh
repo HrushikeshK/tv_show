@@ -66,6 +66,7 @@ UNDERLINE='\033[4m'
 clear
 
 # If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment these lines
+# Also change the IP address for the ping command in the next line, if needed
 
 # if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
 #	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
