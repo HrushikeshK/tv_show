@@ -1,5 +1,7 @@
 #!/bin/sh
 
+
+
 if [ $# -ge 1 ]; then 		# If number of comments is one
 	if [ $# -eq 2 ]; then
 		watch=$1
@@ -35,6 +37,7 @@ if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 	echo "Enter path for your TV shows directory"
 	read tvShow_location 						# Path where your TV shows are located
 	echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
+	echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 else
 	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 2 ]; then
 			pwd > "$HOME/.TVshowLog/.location.log"					# Location of the script file
