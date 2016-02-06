@@ -55,7 +55,7 @@ fi
 		if [ `echo "$(locate git)" | wc -l` -ne 0 ]; then   	# Check whether git is installed
 			echo "Do you want to check for updates?[y/n]"
 			read option 
-			if [ option = 'y' ]; then
+			if [ $option = 'y' ]; then
 				git pull origin master
 			fi
 		else 
