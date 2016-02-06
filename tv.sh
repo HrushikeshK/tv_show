@@ -50,6 +50,16 @@ else
 	fi
 fi
 
+	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")
+
+	if [ $(echo "$(date +%s)") -gt $(($last_epoch+604800)) ]; then 
+		echo "Do you want to check for updates?[y/n]"
+		read option 
+		if [ option = 'y' ]; then
+			git pull origin master
+		fi
+	fi
+
 	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
 
 # ASCII CODES for foreground colours and text attributes
