@@ -39,7 +39,7 @@ if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 	echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
 	echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 else
-	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 2 ]; then
+	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3 ]; then
 			pwd > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 		echo "Enter path for your TV shows directory"
