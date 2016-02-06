@@ -1,5 +1,7 @@
 #!/bin/sh
 
+
+
 if [ $# -ge 1 ]; then 		# If number of comments is one
 	if [ $# -eq 2 ]; then
 		watch=$1
@@ -35,6 +37,7 @@ if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 	echo "Enter path for your TV shows directory"
 	read tvShow_location 						# Path where your TV shows are located
 	echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
+	echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 else
 	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 2 ]; then
 			pwd > "$HOME/.TVshowLog/.location.log"					# Location of the script file
@@ -46,6 +49,16 @@ else
 		tvShow_location=$(cat "$HOME/.TVshowLog/.location.log" | sed -n '2p') 
 	fi
 fi
+
+	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")
+
+	if [ $(echo "$(date +%s)") -gt $(($last_epoch+604800)) ]; then 
+		echo "Do you want to check for updates?[y/n]"
+		read option 
+		if [ option = 'y' ]; then
+			git pull origin master
+		fi
+	fi
 
 	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
 
