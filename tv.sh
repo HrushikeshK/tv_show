@@ -53,11 +53,15 @@ fi
 
 	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")
 
-	if [ $(echo "$(date +%s)") -gt $(($last_epoch+604800)) ]; then 
-		echo "Do you want to check for updates?[y/n]"
-		read option 
-		if [ option = 'y' ]; then
-			git pull origin master
+	if [ $(echo "$(date +%s)") -gt $(($last_epoch+604800)) ]; then		# To check for updates after every 7 days
+		if [ `echo "$(locate git)" | wc -l` -ne 0 ]; then   	# Check whether git is installed
+			echo "Do you want to check for updates?[y/n]"
+			read option 
+			if [ option = 'y' ]; then
+				git pull origin master
+			fi
+		else 
+			echo "Download git to check for updates"
 		fi
 	fi
 
