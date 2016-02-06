@@ -1,7 +1,5 @@
 #!/bin/sh
 
-
-
 if [ $# -ge 1 ]; then 		# If number of comments is one
 	if [ $# -eq 2 ]; then
 		watch=$1
@@ -51,7 +49,7 @@ else
 	fi
 fi
 
-	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")
+	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")		# Get the time when it last checked for update
 
 	if [ $(echo "$(date +%s)") -gt $(($last_epoch+604800)) ]; then		# To check for updates after every 7 days
 		if [ `echo "$(locate git)" | wc -l` -ne 0 ]; then   	# Check whether git is installed
@@ -62,7 +60,10 @@ fi
 			fi
 		else 
 			echo "Download git to check for updates"
+			sleep 1
 		fi
+			new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
+			sed -i s/"$last_epoch"/"$new_epoch" "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
 	fi
 
 	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
