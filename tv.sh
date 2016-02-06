@@ -45,6 +45,7 @@ else
 		echo "Enter path for your TV shows directory"
 		read tvShow_location 						# Path where your TV shows are located
 		echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
+		echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 	else
 		tvShow_location=$(cat "$HOME/.TVshowLog/.location.log" | sed -n '2p') 
 	fi
