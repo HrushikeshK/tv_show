@@ -1,5 +1,7 @@
 #!/bin/sh
 
+script_name=`basename "$0"`		# To get the name of script
+
 if [ $# -ge 1 ]; then 		# If number of comments is one
 	if [ $# -eq 2 ]; then
 		watch=$1
@@ -62,8 +64,8 @@ fi
 			echo "Download git to check for updates"
 			sleep 1
 		fi
-			new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
-			sed -i s/"$last_epoch"/"$new_epoch" "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
+		new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
+		sed -i s/"$last_epoch"/"$new_epoch" "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
 	fi
 
 	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
@@ -241,7 +243,7 @@ done
 		echo "${bold}${RED}Press any key to exit ${NONE}"
 		read enter
 		cd "$position"				# This is required
-		sh "$position/tv.sh"
+		sh "$position/$script_name"
 		exit
 		
 	elif [ $showNumber = 'quit' ] || [ $showNumber = 'q' ]; then			# Quit
@@ -249,11 +251,9 @@ done
 		clear
 		exit
 	elif [ $showNumber = 's' ]; then
-		setwatchedT
+		setwatchedT		# Function to set a TV show as watched
 		showName
 		return
-
-
 	elif [ $showNumber = 'search' ]; then
 		echo "${GREEN}Enter a keyword to search ${NONE}"
 		read tname
@@ -261,17 +261,25 @@ done
 		if [ "$(ls | grep -i "$tname" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
 			DIR="$(ls | grep -i $tname)"
 			cd "$DIR"
-			iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
-			if [ $? -ne 1 ]; then  	# If this tv show is completely watched
-				echo "Woah! You have watched $DIR completely..."
-				echo "Press Enter key to continue"
-				read enter
-				showName
-			else 
-				cd "$DIR"
-				showSeason "$DIR/"
-				return
-			fi
+			
+			if [ $watch = '-u' 2> /dev/null ]; then
+				iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
+				
+				if [ $? -ne 1 ]; then  	# If this tv show is completely watched
+					echo "Woah! You have watched $DIR completely..."
+					echo "Press Enter key to continue"
+					read enter
+					showName
+				else 
+					cd "$DIR"
+					showSeason "$DIR/"
+					return
+				fi
+		    else
+		    	
+		    	showSeason "$DIR/"
+		    	return
+		    fi
 		else 			# If more than one shows with that expression exist
 			for i in `seq 1 $(ls | grep -i $tname | wc -l)`; do
 				echo "$i. $(ls | grep -i $tname | head -n $i | tail -n 1)"
@@ -281,14 +289,19 @@ done
 				if [ $num -ne 0 -o $num -eq 0 2> /dev/null ]; then
 					DIR="$(ls | grep -i $tname | head -n $num | tail -n 1)"
 					cd "$DIR"
-					iswatchedS "$DIR/"		# Function call to check whether selected tv show is watched
-					if [ $? -ne 1 ]; then		# If the selected TV show is completely watched
-						echo "Woah! You have watched $DIR completely..."
-						echo "Press Enter key to continue"
-						read enter
-						showName
+					if [ $watch = '-u' 2> /dev/null ]; then
+						iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
+						if [ $? -ne 1 ]; then		# If the selected TV show is completely watched
+							echo "Woah! You have watched $DIR completely..."
+							echo "Press Enter key to continue"
+							read enter
+							showName
+						else 		# Else if the tv show is not watched yet, then show seasons
+							cd "$DIR"
+							showSeason "$DIR/"
+							return
+						fi
 					else
-						cd "$DIR"
 						showSeason "$DIR/"
 						return
 					fi
@@ -302,11 +315,11 @@ done
 
 	elif [ $showNumber = 'a' ] && [ $watch = '-u' 2> /dev/null ]; then			# To Shift from "show unwatched" to "show all"
 		cd "$position"				# This is required
-		sh "$position/tv.sh"
+		sh "$position/$script_name"
 		exit
 	elif [ $showNumber = 'u' ]; then			# To watch unwatched TV shows
 		cd "$position"				# This is required
-		sh "$position/tv.sh" -u 									# Call tv with "u" as argument for that
+		sh "$position/$script_name" -u 									# Call tv with "u" as argument for that
 		exit
 	elif [ $showNumber -gt $int 2> /dev/null ]; then			# If the entered number is greater than availabale options
 		echo "Enter valid number..."
