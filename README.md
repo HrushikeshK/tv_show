@@ -7,8 +7,7 @@ The command "tv -u" displays only episodes that are unwatched.
 
 The command "tv -name" or "tv --name" followed by the keyword can be used to display tv shows having having that keyword
 
-* Make tv.sh an executable using chmod command.
-* Create an alias for "sh /path/to/tv.sh" and you are good to go to use tv.sh from any location on terminal.
+* Create an alias, for example alias tv="/path/to/tv.sh" and you are good to go to use tv.sh from any location on terminal.
 
 ### Requirements:
 * vlc media player
@@ -16,14 +15,14 @@ The command "tv -name" or "tv --name" followed by the keyword can be used to dis
 * git
 
 ### Installation:
-* Copy the https URL given for this repository
-* Open terminal and type "git clone copied_url"
+* Open your terminal and type "git clone https://github.com/HrushikeshK/tv_show.git"
+* A folder with name "tv_show" will be created in which necessary files are placed.
 
 ### While running program for first time
 * You need to specify the path to your TV shows directory.
 * The format must be: TV show name(directory) -> Season number(directory) -> episodes(media files)
 * There should not be an extra directory between episodes and Season Number. e.g: The following path won't work
-  TvShow/Show_name/Show_season/Extra_directory/episode.mp4
+  TvShows/Show_name/Show_season/Extra_directory/episode.mp4
 
 #### If your tv shows are on the other device which is connected to your LAN and has ssh server running
 * You need to install sshfs utility. To install sshfs, type
