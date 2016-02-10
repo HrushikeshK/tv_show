@@ -1,6 +1,6 @@
 #!/bin/sh
 
-script_name=`basename "$0"`		# To get the name of script
+script_name=`basename "$0"`		# To get the name of script, basename command deletes the prefexing directory's names
 
 if [ $# -ge 1 ]; then 		# If number of comments is one
 	if [ $# -eq 2 ]; then
@@ -59,6 +59,7 @@ fi
 			read option 
 			if [ $option = 'y' ]; then
 				git pull origin master
+				sleep 0.5
 			fi
 		else 
 			echo "Download git to check for updates"
