@@ -66,7 +66,7 @@ fi
 			sleep 1
 		fi
 		new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
-		sed -i s/"$last_epoch"/"$new_epoch" "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
+		sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
 	fi
 
 	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
