@@ -51,6 +51,7 @@ else
 	fi
 fi
 
+	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
 	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")		# Get the time when it last checked for update
 
 	if [ $(echo "$(date +%s)") -gt $(($last_epoch+604800)) ]; then		# To check for updates after every 7 days
@@ -58,6 +59,7 @@ fi
 			echo "Do you want to check for updates?[y/n]"
 			read option 
 			if [ $option = 'y' ]; then
+				cd "$position"
 				git pull origin master
 				sleep 0.5
 			fi
@@ -69,7 +71,7 @@ fi
 		sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
 	fi
 
-	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
+	
 
 # ASCII CODES for foreground colours and text attributes
 NONE='\033[00m'
