@@ -32,7 +32,7 @@ fi
 # GENERALISATION
 if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 
-	pwd > "$HOME/.TVshowLog/.location.log"					# Location of the script file
+	locate "$script_name" | head -n 1 | sed s/"$script_name"/""/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 	echo "Enter path for your TV shows directory"
 	read tvShow_location 						# Path where your TV shows are located
@@ -40,7 +40,7 @@ if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 	echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 else
 	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3 ]; then
-			pwd > "$HOME/.TVshowLog/.location.log"					# Location of the script file
+			locate "$script_name" | head -n 1 | sed s/"$script_name"/""/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 		echo "Enter path for your TV shows directory"
 		read tvShow_location 						# Path where your TV shows are located
