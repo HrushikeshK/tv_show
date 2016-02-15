@@ -1,5 +1,5 @@
 # tv_show
-####Help to browse and watch your TV shows from command line.
+#### Help to browse and watch your TV shows from command line.
 
 The command "tv" displays all episodes.
 
@@ -15,7 +15,7 @@ The command "tv -name" or "tv --name" followed by the keyword can be used to dis
 * git
 
 ### Installation:
-* Open your terminal and type "git clone https://github.com/HrushikeshK/tv_show.git"
+* Open your terminal and type "git clone https://gitlab.com/hrushikeshk/tv_show.git"
 * A folder with name "tv_show" will be created in which necessary files are placed.
 
 ### While running program for first time
