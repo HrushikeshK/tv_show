@@ -32,7 +32,7 @@ fi
 # GENERALISATION
 if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 
-	locate "$script_name" | head -n 1 | sed s/"$script_name"/""/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
+	echo "$0" | sed s/"$script_name"/""/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 	echo "Enter path for your TV shows directory"
 	read tvShow_location 						# Path where your TV shows are located
@@ -40,7 +40,7 @@ if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 	echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 else
 	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3 ]; then
-			locate "$script_name" | head -n 1 | sed s/"$script_name"/""/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
+		echo "$0" | sed s/"$script_name"/""/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 		echo "Enter path for your TV shows directory"
 		read tvShow_location 						# Path where your TV shows are located
@@ -54,21 +54,31 @@ fi
 	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
 	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")		# Get the time when it last checked for update
 
-	if [ $(echo "$(date +%s)") -gt $(($last_epoch+604800)) ]; then		# To check for updates after every 7 days
+	if [ $(echo "$(date +%s)") -ge $(($last_epoch+604800)) ]; then		# To check for updates after every 7 days
 		if [ `echo "$(locate git)" | wc -l` -ne 0 ]; then   	# Check whether git is installed
 			echo "Do you want to check for updates?[y/n]"
 			read option 
 			if [ $option = 'y' ]; then
 				cd "$position"
 				git pull origin master
-				sleep 0.5
+				sleep 1
+
+				new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
+				sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
+
+				cd "$position"				# This is required
+				sh "$position/$script_name"
+				exit
+
 			fi
 		else 
 			echo "Download git to check for updates"
 			sleep 1
 		fi
+
 		new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
 		sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
+
 	fi
 
 	
@@ -213,7 +223,7 @@ done
 				if [ $int -lt 10 ]; then
 					echo  " $int." $tvShow | tr -d "/"		# To trim "/" character
 				else 
-					echo  "$int." $tvShow | tr -d "/"
+					echo  "$int." $tvShow | tr -d "/"		# To trim "/" character
 				fi
 			else 
 				continue
@@ -226,7 +236,7 @@ done
 			if [ $int -lt 10 ]; then
 				echo  " $int." $tvShow | tr -d "/"		# To trim "/" character
 			else 
-				echo  "$int." $tvShow | tr -d "/"
+				echo  "$int." $tvShow | tr -d "/"		# To trim "/" character
 			fi
 		done
 	fi
