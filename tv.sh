@@ -223,7 +223,7 @@ done
 				if [ $int -lt 10 ]; then
 					echo  " $int." $tvShow | tr -d "/"		# To trim "/" character
 				else 
-					echo  "$int." $tvShow | tr -d "/"		# To trim "/" character
+					echo  "$int." $tvShow | tr -d "/"
 				fi
 			else 
 				continue
@@ -236,7 +236,7 @@ done
 			if [ $int -lt 10 ]; then
 				echo  " $int." $tvShow | tr -d "/"		# To trim "/" character
 			else 
-				echo  "$int." $tvShow | tr -d "/"		# To trim "/" character
+				echo  "$int." $tvShow | tr -d "/"
 			fi
 		done
 	fi
@@ -363,11 +363,23 @@ showSeason() {
 DIR=$1		# Argument passed to this Function
 
 clear		# Command to clear screen
+
+if [ $watch = '-u' 2> /dev/null ]; then			# IF argument -u is passed
+	iswatchedS "$DIR"		# Check if the whole tv show is watched
+	if [ $? -eq 0 ]; then
+		showName
+		return
+	fi
+
+	cd "$DIR"
+fi
+
+
 echo "${PINK}${BOLD} $DIR: ${NONE}" | tr -d "/"
 count=0
 
 # TESTING 
-if [ $watch = '-u' 2> /dev/null ]; then			# IF argument is passed
+if [ $watch = '-u' 2> /dev/null ]; then			# IF argument -u is passed
 	for int in */; do 
 	count=$((count+1))
 		cd "$int"
@@ -454,6 +466,16 @@ show=$(echo "$Season" | tr -d "/")					# To remove / from the directory name so 
 count=$(ls | grep -E '*.mp4|*.mkv|*.avi' | wc -l)
 
 clear		# Command to clear screen
+
+
+if [ $watch = '-u' 2> /dev/null ]; then			# If argument -u is passed
+	iswatched "$Dir" "$Season"		# Check whether all episodes are watched
+	if [ $? -eq 0 ]; then		# If all the episodes from this season are watched
+		showSeason "$Dir"
+		return
+	fi
+	cd "$Season"	# Enter into particular season
+fi
 
 echo "${PINK}${BOLD} $Dir ${NONE}${YELLOW}$Season: ${NONE}" | tr -d "/"
 
@@ -568,6 +590,8 @@ fi
 
 clear  		 # Command to clear screen
 
+
+
 	showEpisode "$Dir" "$Season"		# Go to episodes section again after watching the video
 	return
 }
@@ -601,10 +625,12 @@ if [ $epNumber = 'r' ]; then			# RANGE
 	read secondNumber
 	i=$firstNumber
 
+
 	# RANGE
 	while [ $i -le $secondNumber ]; do
 		Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
 		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
+			i=$((i+1))			
 			continue
 		else
 			echo "$Episode" >> "$HOME/.TVshowLog/$Dir$show"
@@ -613,6 +639,7 @@ if [ $epNumber = 'r' ]; then			# RANGE
 		echo "Successfully set $Episode as watched"
 		sleep 0.5
 		i=$((i+1))
+		
 	done
 	# INDIVIDUAL
 elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether entered value is an integer
@@ -802,6 +829,7 @@ iswatched() {
 
 }
 
+# A function which will return boolean value after checking whether all seasons of this show are watched
 iswatchedS() {
 
 	Dir=$1
@@ -864,7 +892,7 @@ if [ $epNumber = 'r' ]; then
 		sed -i /"$Episode"/d "$HOME/.TVshowLog/$Dir$show"				# Delete the entry from log
 		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Episode as UNWATCHED"
-		sleep 1
+		sleep 0.5
 	done
 fi
 
@@ -879,7 +907,7 @@ if [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether en
 		sed -i /"$Episode"/d "$HOME/.TVshowLog/$Dir$show"				# Delete the entry from log
 		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Episode as UNWATCHED"
-		sleep 1
+		sleep 0.5
 	fi
 else
 	return 
