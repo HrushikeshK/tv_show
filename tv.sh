@@ -116,9 +116,7 @@ clear
  if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
  	echo "Problem Loading TV shows"
  	echo "Check whether the specified location contains TV shows and is mounted"
- 	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3]; then		# If location.log file is not updated correctly
-		rm "$HOME/.TVshowLog/.location.log"
-	fi
+	rm "$HOME/.TVshowLog/.location.log"
 	sleep 0.5
  	exit
  fi 
