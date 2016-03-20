@@ -67,7 +67,7 @@ fi
 				sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
 
 				cd "$position"				# This is required
-				sh "$position/$script_name"
+				sh "$position/$script_name" "$@" 	# Run script with previous arguments
 				exit
 
 			fi
@@ -116,7 +116,10 @@ clear
  if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
  	echo "Problem Loading TV shows"
  	echo "Check whether the specified location contains TV shows and is mounted"
- 	rm "$HOME/.TVshowLog/.location.log"
+ 	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3]; then		# If location.log file is not updated correctly
+		rm "$HOME/.TVshowLog/.location.log"
+	fi
+	sleep 0.5
  	exit
  fi 
 
