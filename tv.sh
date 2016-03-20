@@ -67,7 +67,7 @@ fi
 				sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
 
 				cd "$position"				# This is required
-				sh "$position/$script_name"
+				sh "$position/$script_name" "$@" 	# Run script with previous arguments
 				exit
 
 			fi
