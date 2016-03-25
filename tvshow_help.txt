@@ -12,8 +12,9 @@ DESCRIPTION:
 OPTIONS:
 	The command "tv" displays all episodes.
 	The command "tv -u" displays only episodes that are unwatched.
-	The command "tv -name" or "tv --name" followed by the keyword can be used to display tv shows having having that 	keyword
-	The command "tv -u -n show_name" displays episodes of those shows which are not watched
+	The command "tv -n" or "tv --name" followed by the keyword can be used to display tv shows having having that 	keyword
+	The command "tv -u -n 'show_name'" displays shows matching 'show_name' keyword
+	The command "tv --latest 'n'" will display episodes which are atmost 'n' days newer
 
 1. While selecting a TV show:
 
