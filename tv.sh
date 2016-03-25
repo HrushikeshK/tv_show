@@ -10,8 +10,8 @@ if [ $# -ge 1 ]; then 		# If number of comments is one
 		watch=$1
 		arg2=$2
 		name=$3
-	else
-		watch=$1
+	else 			# If only one argument is passed
+ 		watch=$1
 	fi
 fi
 
@@ -67,6 +67,7 @@ fi
 				sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
 
 				cd "$position"				# This is required
+
 				sh "$position/$script_name" "$@" 	# Run script with previous arguments
 				exit
 
@@ -102,6 +103,9 @@ clear
 # If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment these lines
 # Also change the IP address for the ping command in the next line, if needed
 
+# If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment these lines
+# Also change the IP address for the ping command in the next line, if needed
+
 # if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
 #	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
 #		echo "${GREEN} Mounting remote filesystem... ${NONE}"
@@ -116,10 +120,85 @@ clear
  if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
  	echo "Problem Loading TV shows"
  	echo "Check whether the specified location contains TV shows and is mounted"
-	rm "$HOME/.TVshowLog/.location.log"
-	sleep 0.5
+ 	rm "$HOME/.TVshowLog/.location.log"
  	exit
  fi 
+
+
+########################TESTING#########################
+
+latestEpisodes() {
+
+	due=$1		# To get number of days before
+
+	clear
+
+	cd "$tvShow_location"
+
+	echo "${GREEN}Episodes Due $due Days:${NONE}"
+
+	for i in `seq 1 $(find . -ctime -$due -type f | grep -E '*.mkv|*.avi|*.mp4' | wc -l)`;do
+		value=`find . -ctime -$due -type f | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
+		echo "$value" > "$HOME/.TVshowLog/.temp"	# awk needs a file :(
+		Dir="$(awk -F"/" '{ print $2 }' "$HOME/.TVshowLog/.temp")" 
+		show="$(awk -F"/" '{ print $3 }' "$HOME/.TVshowLog/.temp")"
+		value="$(basename "$value")"
+		if grep -q "$value" "$HOME/.TVshowLog/$Dir/$show" ; then		# Ignore episodes that are in the log
+			continue
+		else
+			if [ $i -lt 10 ]; then
+				echo " $i. $value"			#Print Episode's number before 10
+			else
+				echo "$i. $value"
+			fi
+		fi 
+	done
+
+	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"			# deletes \n from echo so that next command is executed on same line i.e read command
+	read number
+
+	if [ $number = 'b' ]; then
+		showName
+		return
+	elif [ $number = 'q' ]; then
+		exit
+	fi
+
+	Episode="$(find . -ctime -$due -type f | grep -E '*.mkv|*.avi|*.mp4' | head -n $number | tail -n 1)"
+	echo "$Episode" > "$HOME/.TVshowLog/.temp"	# awk needs a file :(
+	Dir="$(awk -F"/" '{ print $2 }' "$HOME/.TVshowLog/.temp")" 
+	show="$(awk -F"/" '{ print $3 }' "$HOME/.TVshowLog/.temp")"
+
+
+	echo "Playing $(basename "$Episode")..."
+	vlc -f "$Episode" 2> /dev/null
+
+	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
+	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
+	read answer
+
+	if [ $answer = 'y' ]; then 
+		if grep -q "$(basename "$Episode")" "$HOME/.TVshowLog/$Dir/$show"; then	# Does not repeat the entries in log file
+			echo "$(basename "$Episode")"
+			echo "$HOME/.TVshowLog/$Dir/$show"
+			continue
+		else
+			echo "$(basename "$Episode")" >> "$HOME/.TVshowLog/$Dir/$show"			# Add the entry of the episode to watched list
+			sort "$HOME/.TVshowLog/$Dir/$show" -o "$HOME/.TVshowLog/$Dir/$show" 	# Sort log file
+			echo "Successfully set $(basename "$Episode") as watched"
+			sleep 1
+		fi
+	else
+		continue
+	fi
+
+	latestEpisodes $due
+
+
+}
+
+#####################TESTING############################
+
 
 showName() {
 
@@ -497,10 +576,10 @@ value=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
 		fi
 	else
 		if [ $i -lt 10 ]; then
-				echo " $i. $value"			#Print Episode's number before 10
-			else
-				echo "$i. $value"
-			fi
+			echo " $i. $value"			#Print Episode's number before 10
+		else
+			echo "$i. $value"
+		fi
 	fi
 done
 
@@ -922,7 +1001,9 @@ if [ $# -ne 0 ]; then		# If number of parameters is not zero
 	if [ $watch = '--name' 2> /dev/null ] || [ $watch = '-n' 2> /dev/null ]; then
 		showName $watch 		#function call
 	elif [ $arg2 = '-n' 2> /dev/null ]; then
-			showName $watch $name 	# If 2 parameters 
+			showName $watch $name 	# If 2 parameters
+	elif [ $watch = '--latest' ]; then
+		latestEpisodes	$2	 		#statements			 	
 	else
 		showName
 	fi
