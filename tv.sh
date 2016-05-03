@@ -154,7 +154,7 @@ latestEpisodes() {
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"			# deletes \n from echo so that next command is executed on same line i.e read command
 	read number
 
-	if [ $number = 'b' ]; then
+	if [ $number = 'b' ] || [ $number = 'a' ]; then
 		showName
 		return
 	elif [ $number = 'q' ]; then
