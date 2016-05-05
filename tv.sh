@@ -52,6 +52,9 @@ else
 fi
 
 	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
+
+	## To check Updates
+
 	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")		# Get the time when it last checked for update
 
 	if [ $(echo "$(date +%s)") -ge $(($last_epoch+604800)) ]; then		# To check for updates after every 7 days
@@ -220,12 +223,15 @@ done
 
 	clear		# Command to clear screen
 
+
+# The number of parameters here are not the one given by user, they are passed by the main function written below.
+
 # If -n or --nmae parameter is passed to the program
 	if [ $# -eq 1 ]; then		# If only one argument is passed to this function
 		if [ "$(ls | grep -i "$name" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
 			DIR="$(ls | grep -i $name)"
 			cd "$(ls | grep -i $name)"
-			showSeason "$DIR"
+			showSeason "$DIR/"
 			return
 		else 			# If more than one shows with that expression exist
 			for i in `seq 1 $(ls | grep -i $name | wc -l)`; do
@@ -236,7 +242,7 @@ done
 				if [ $num -ne 0 -o $num -eq 0 2> /dev/null ]; then
 					DIR="$(ls | grep -i $name | head -n $num | tail -n 1)"
 					cd "$DIR"
-					showSeason "$DIR"
+					showSeason "$DIR/"
 					return
 				else
 					echo "Invalid Number..."
@@ -245,7 +251,7 @@ done
 		fi
 	fi
 
-# If -u -n parameters are passed to the program
+# If -u -n "showname" parameters are passed to the program
 	if [ $# -eq 2 ]; then		# If user wants to check only unwatched seasons of specified keyword
 		if [ "$(ls | grep -i "$name" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
 			DIR="$(ls | grep -i $name)"
@@ -455,7 +461,6 @@ fi
 echo "${PINK}${BOLD} $DIR: ${NONE}" | tr -d "/"
 count=0
 
-# TESTING 
 if [ $watch = '-u' 2> /dev/null ]; then			# IF argument -u is passed
 	for int in */; do 
 	count=$((count+1))
@@ -641,22 +646,22 @@ elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether 
 	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi' | head -n $epNumber | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null				#Play episode using vlc in full screen
-	
-	# Ask whetehr current episode is watched
-	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
-	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
-	read answer
-	if [ $answer = 'y' ]; then 
-		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then	# Does not repeat the entries in log file
-			continue
-		else
+
+
+	# To Set current episode as watched, First checked if it is set as watched before
+	if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then	# Does not repeat the entries in log file
+		continue	
+	else
+		# Ask whether current episode is watched
+		echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
+		echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
+		read answer
+		if [ $answer = 'y' ]; then 
 			echo "$Episode" >> "$HOME/.TVshowLog/$Dir$show"			# Add the entry of the episode to watched list
 			sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 			echo "Successfully set $Episode as watched"
 			sleep 1
 		fi
-	else
-		continue
 	fi
 else
 	echo "Enter valid number..."	
