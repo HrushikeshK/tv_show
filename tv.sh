@@ -1,6 +1,7 @@
 #!/bin/sh
 
 script_name=`basename "$0"`		# To get the name of script, basename command deletes the prefexing directory's names
+script_location=`dirname "$0"`	# Get locatio of the script, dirname command deletes last entry of the path
 
 if [ $# -ge 1 ]; then 		# If number of comments is one
 	if [ $# -eq 2 ]; then
@@ -32,7 +33,7 @@ fi
 # GENERALISATION
 if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 
-	echo "$0" | sed s/"$script_name"/""/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
+	echo "$script_location" > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 	echo "Enter path for your TV shows directory"
 	read tvShow_location 						# Path where your TV shows are located
@@ -40,7 +41,7 @@ if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 	echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 else
 	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3 ]; then
-		echo "$0" | sed s/"$script_name"/""/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
+		echo "$script_location"/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 		echo "Enter path for your TV shows directory"
 		read tvShow_location 						# Path where your TV shows are located
@@ -51,7 +52,7 @@ else
 	fi
 fi
 
-	position=$(sed -n '1p' "$HOME/.TVshowLog/.location.log")			# Location of the script
+	position="$script_location"			# Location of the script
 
 	## To check Updates
 
@@ -997,6 +998,21 @@ fi
 
 }
 
+
+getLog() {
+
+	location=$(sed -n '2p' "$HOME/.TVshowLog/.location.log")			# Location of the Tv shows
+
+	count_total=`ls "$location"*/* | grep -E '*.mp4|*.avi|*.mkv' | wc -l`
+	count_watched=`cat "$HOME/.TVshowLog/"*/* | wc -l`
+
+	echo "${RED}Statistics:${NONE}"
+	echo "Total Episodes:" $count_total
+	echo "Total Episodes Watched:" $count_watched
+	echo "Episodes Unwatched:" $((count_total-count_watched))
+
+}
+
 # Main starts here
 
 if [ $# -ne 0 ]; then		# If number of parameters is not zero
@@ -1005,7 +1021,9 @@ if [ $# -ne 0 ]; then		# If number of parameters is not zero
 	elif [ $arg2 = '-n' 2> /dev/null ]; then
 			showName $watch $name 	# If 2 parameters
 	elif [ $watch = '--latest' ]; then
-		latestEpisodes	$2	 		#statements			 	
+		latestEpisodes	$2	 		#statements		
+	elif [ $watch = '--log' ]; then
+		getLog	 	
 	else
 		showName
 	fi
