@@ -1,6 +1,7 @@
 #!/bin/sh
 
-script_name=`basename "$0"`		# To get the name of script, basename command deletes the prefexing directory's names
+script_name=`dirname "$0"`		# To get relative path of the script, dirname command deletes last entry of the path
+script_name="`( cd "$script_name" && pwd)`"	# To get absolute path of the script
 script_location=`dirname "$0"`	# Get locatio of the script, dirname command deletes last entry of the path
 
 if [ $# -ge 1 ]; then 		# If number of comments is one
@@ -1002,8 +1003,8 @@ fi
 getLog() {
 
 	location=$(sed -n '2p' "$HOME/.TVshowLog/.location.log")			# Location of the Tv shows
-
-	count_total=`ls "$location"*/* | grep -E '*.mp4|*.avi|*.mkv' | wc -l`
+	
+	count_total=`ls "$location/"*/* | grep -E '*.mp4|*.avi|*.mkv' | wc -l`
 	count_watched=`cat "$HOME/.TVshowLog/"*/* | wc -l`
 
 	echo "${RED}Statistics:${NONE}"
