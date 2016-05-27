@@ -1,5 +1,5 @@
 # tv_show
-#### Help to browse and watch your TV shows from command line.
+#### Help to watch and manage your TV shows from command line.
 
 The command "tv" displays all episodes.
 

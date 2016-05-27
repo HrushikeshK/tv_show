@@ -105,18 +105,49 @@ UNDERLINE='\033[4m'
 
 clear
 
-# If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment these lines
-# Also change the IP address for the ping command in the next line, if needed
+updateconf() {
+	lanLog="$HOME/.TVshowLog/.lan.log"				# Address of Lan config file
+ 
+ 	echo "Enter IP address of remote machine"
+ 	read ip
+  	echo "Enter path for the TV shows on remote machine"
+ 	read remotePath
+ 	echo "Enter username of remote machine"
+ 	read username
 
-# if ping -c 1 192.168.1.100 | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
-#	if [ $(ls $tvShow_location | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
-#		echo "${GREEN} Mounting remote filesystem... ${NONE}"
-#		sshfs username@ipAddress:"path_to_your_tv_shows_location_on_your_remote_device" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
-#	fi
-# else
-#		echo "${RED} ${BOLD}Problem in connection...${NONE}"
-#		sleep 1
-#		exit
+ 	echo "$ip" > "$lanLog"				# Line 1: IP address
+ 	echo "$remotePath" >> "$lanLog"		# Line 2: path of TV shows directory from remote machine
+ 	echo "$username" >> "$lanLog"		# Line 3: Username of remote machine
+
+ 	echo "${BOLD}Network Settings configured ${NONE}"
+}
+
+mountFS() {
+	if [ ! -f "$HOME/.TVshowLog/.lan.log" ]; then
+		updateconf			# Create a config file for network streaming
+	fi
+ 	# Update variables from lan config file
+ 	lanLog="$HOME/.TVshowLog/.lan.log"				# Address of Lan config file
+ 	ip=`sed -n 1p "$lanLog"`
+ 	remotePath=`sed -n 2p "$lanLog"`
+ 	username=`sed -n 3p "$lanLog"`
+
+ if ping -c 1 "$ip" | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
+	if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
+		echo "${GREEN} Mounting remote filesystem... ${NONE}"
+		sshfs "$username"@"$ip":"$remotePath" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
+	fi
+ else
+		echo "${RED} ${BOLD}Problem in connection...${NONE}"
+		sleep 1
+		exit
+ fi
+}
+
+### If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment the below lines
+
+# if [ $watch != '--nconfig' ]; then
+# 	mountFS		# Call this function for streaming from network
 # fi
 
  if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
@@ -125,9 +156,6 @@ clear
  	rm "$HOME/.TVshowLog/.location.log"
  	exit
  fi 
-
-
-########################TESTING#########################
 
 latestEpisodes() {
 
@@ -142,9 +170,11 @@ latestEpisodes() {
 	for i in `seq 1 $(find . -ctime -$due -type f | grep -E '*.mkv|*.avi|*.mp4' | wc -l)`;do
 		value=`find . -ctime -$due -type f | grep -E '*.mp4|*.mkv|*.avi' | head -n $i | tail -n 1`
 		echo "$value" > "$HOME/.TVshowLog/.temp"	# awk needs a file :(
+
 		Dir="$(awk -F"/" '{ print $2 }' "$HOME/.TVshowLog/.temp")" 
 		show="$(awk -F"/" '{ print $3 }' "$HOME/.TVshowLog/.temp")"
 		value="$(basename "$value")"
+
 		if grep -q "$value" "$HOME/.TVshowLog/$Dir/$show" ; then		# Ignore episodes that are in the log
 			continue
 		else
@@ -163,6 +193,8 @@ latestEpisodes() {
 		showName
 		return
 	elif [ $number = 'q' ]; then
+		for i in T h a n k "-" Y o u; do echo -n $i; sleep 0.10; done; echo; sleep 0.2
+		clear
 		exit
 	fi
 
@@ -198,8 +230,6 @@ latestEpisodes() {
 
 
 }
-
-#####################TESTING############################
 
 
 showName() {
@@ -419,6 +449,11 @@ done
 		cd "$position"				# This is required
 		sh "$position/$script_name" -u 									# Call tv with "u" as argument for that
 		exit
+	elif [ $showNumber = 'latest' ]; then	# To display latest episodes
+		echo "How many days due?"
+		read days
+		latestEpisodes $days
+		return
 	elif [ $showNumber -gt $int 2> /dev/null ]; then			# If the entered number is greater than availabale options
 		echo "Enter valid number..."
 		sleep 1
@@ -1025,6 +1060,8 @@ if [ $# -ne 0 ]; then		# If number of parameters is not zero
 		latestEpisodes	$2	 		#statements		
 	elif [ $watch = '--log' ]; then
 		getLog	 	
+	elif [ $watch = '--nconfig' ]; then
+		updateconf		# function call to update lan config file		
 	else
 		showName
 	fi
@@ -1034,4 +1071,5 @@ fi
 
 tput sgr0		# Resets all color changes made in terminal
 exit
+
 #END
