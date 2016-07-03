@@ -27,7 +27,7 @@ fi
 
 if [ $watch = '-h' 2> /dev/null ]; then			# Help Page
 	clear
-	cat "$HOME/.TVshowLog/.help.txt"
+	cat "$HOME/.TVshowLog/.help.txt" | less
 	exit
 fi
 
@@ -60,7 +60,7 @@ fi
 	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")		# Get the time when it last checked for update
 
 	if [ $(echo "$(date +%s)") -ge $(($last_epoch+604800)) ]; then		# To check for updates after every 7 days
-		if [ `echo "$(locate git)" | wc -l` -ne 0 ]; then   	# Check whether git is installed
+		if [ -f /usr/bin/git ]; then   	# Check whether git is installed
 			echo "Do you want to check for updates?[y/n]"
 			read option 
 			if [ $option = 'y' ]; then
@@ -70,8 +70,6 @@ fi
 
 				new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
 				sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
-
-				cd "$position"				# This is required
 
 				sh "$position/$script_name" "$@" 	# Run script with previous arguments
 				exit
@@ -90,14 +88,14 @@ fi
 	
 
 # ASCII CODES for foreground colours and text attributes
-NONE="$(tput sgr 0)"
+NONE="$(tput sgr 0)"                            # Reset
 RED="$(tput setaf 1)"
-PINK="$(tput setaf 1)"				# Might look like Red
-GREEN="$(tput setaf 2)"   			# Might Look like yellow
-YELLOW="$(tput setaf 3)"			# Might look like Green
-PURPLE="$(tput setaf 5)"
-CYAN="$(tput setaf 6)"
-LIGHT_CYAN="$(tput setaf 4)"    # Blue color
+PINK="$(tput setaf 1)"				# Red
+GREEN="$(tput setaf 2)"   			# Yellow
+YELLOW="$(tput setaf 3)"			# Green
+PURPLE="$(tput setaf 5)"			# Magenta
+CYAN="$(tput setaf 6)"				# Cyan
+LIGHT_CYAN="$(tput setaf 4)"        # Blue 
 WHITE="$(tput setaf 7)"
 BOLD="$(tput bold)"
 UNDERLINE="$(tput smul)"
@@ -265,7 +263,7 @@ done
 			cd "$(ls | grep -i $name)"
 			showSeason "$DIR/"
 			return
-		else 			# If more than one shows with that expression exist
+		elif [ "$(ls | grep -i "$name" | wc -l )" -eq 1 ]; then 			# If more than one shows with that expression exist
 			for i in `seq 1 $(ls | grep -i $name | wc -l)`; do
 				echo "$i. $(ls | grep -i $name | head -n $i | tail -n 1)"
 			done
@@ -280,6 +278,10 @@ done
 					echo "Invalid Number..."
 					sleep 0.5
 				fi
+		else
+			echo "${RED}${BOLD} No such show available...${NONE}"
+			showName
+			return 
 		fi
 	fi
 
@@ -290,7 +292,7 @@ done
 			cd "$DIR"
 			iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
 			if [ $? -ne 1 ]; then  	# If this tv show is completely watched
-				echo "Woah! You have watched $DIR completely..."
+				echo "Woah! You have watched ${BOLD}${PURPLE}${DIR}${NONE} completely..."
 				echo "Press Enter key to continue"
 				read enter
 				clear
@@ -299,7 +301,7 @@ done
 				showSeason "$DIR/"
 				return
 			fi
-		else 			# If more than one shows with that expression exist
+		elif [ "$(ls | grep -i "$name" | wc -l )" -gt 1 ]; then  			# If more than one shows with that expression exist
 			for i in `seq 1 $(ls | grep -i $name | wc -l)`; do
 				echo "$i. $(ls | grep -i $name | head -n $i | tail -n 1)"
 			done
@@ -310,7 +312,7 @@ done
 					cd "$DIR"
 					iswatchedS "$DIR/"		# Function call to check whether selected tv show is watched
 					if [ $? -ne 1 ]; then		# If the selected TV show is completely watched
-						echo "Woah! You have watched $DIR completely..."
+						echo "Woah! You have watched ${BOLD}${PURPLE}${DIR}${NONE} completely..."
 						echo "Press Enter key to continue" 
 						read enter
 						clear
@@ -323,6 +325,11 @@ done
 					echo "Invalid Number..."
 					sleep 0.5
 				fi
+		else
+			echo ""
+			echo "${RED} ${BOLD}No such show availabale... ${NONE}"
+			showName 
+			return
 		fi
 	fi
 
@@ -368,10 +375,8 @@ done
 	elif [ $showNumber = 'h' ]; then
 		clear
 		cat "$HOME/.TVshowLog/.help.txt"
-		echo "${bold}${RED}Press Enter to exit ${NONE}"
-		read enter
-		cd "$position"				# This is required
-		sh "$position/$script_name"
+		read -n1 -rsp "${BOLD}${RED}Press any key to continue ${NONE}" key
+		showName "$@"
 		exit
 		
 	elif [ $showNumber = 'quit' ] || [ $showNumber = 'q' ]; then			# Quit
@@ -386,6 +391,12 @@ done
 		echo "${GREEN}Enter a keyword to search ${NONE}"
 		read tname
 
+		if [ -z $tname ]; then
+			echo "${RED}${BOLD} Invalid Argument ${NONE}"
+			showName "$@"
+			return
+		fi
+
 		if [ "$(ls | grep -i "$tname" | wc -l )" -eq 1 ]; then 	# If only one show with name expression exists then enter that show's directory
 			DIR="$(ls | grep -i $tname)"
 			cd "$DIR"
@@ -394,21 +405,20 @@ done
 				iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
 				
 				if [ $? -ne 1 ]; then  	# If this tv show is completely watched
-					echo "Woah! You have watched $DIR completely..."
+					echo "Woah! You have watched ${BOLD}${PURPLE}${DIR}${NONE} completely..."
 					echo "Press Enter key to continue"
 					read enter
 					showName
-				else 
+				else
 					cd "$DIR"
 					showSeason "$DIR/"
 					return
 				fi
-		    else
-		    	
-		    	showSeason "$DIR/"
+		    else	    	
+		    	showSeason "$DIR/"		# When -u is not used
 		    	return
 		    fi
-		else 			# If more than one shows with that expression exist
+		elif [ "$(ls | grep -i "$tname" | wc -l )" -gt 1 ]; then  # If more than one shows with that expression exist
 			for i in `seq 1 $(ls | grep -i $tname | wc -l)`; do
 				echo "$i. $(ls | grep -i $tname | head -n $i | tail -n 1)"
 			done
@@ -420,11 +430,11 @@ done
 					if [ $watch = '-u' 2> /dev/null ]; then
 						iswatchedS "$DIR/" 	# Function call to check whether selected tv show is watched
 						if [ $? -ne 1 ]; then		# If the selected TV show is completely watched
-							echo "Woah! You have watched $DIR completely..."
+							echo "Woah! You have watched ${BOLD}${PURPLE}${DIR}${NONE} completely..."
 							echo "Press Enter key to continue"
 							read enter
 							showName
-						else 		# Else if the tv show is not watched yet, then show seasons
+						else		# Else if the tv show is not watched yet, then show seasons
 							cd "$DIR"
 							showSeason "$DIR/"
 							return
@@ -438,6 +448,10 @@ done
 					sleep 0.5
 					showName
 				fi
+			else
+				echo "${RED}${BOLD} No such Show available ${NONE}"
+				showName "$@"		# Call this function again with previous arguments
+				return
 		fi
 
 
@@ -1041,12 +1055,19 @@ getLog() {
 	
 	count_total=`ls "$location/"*/* | grep -E '*.mp4|*.avi|*.mkv' | wc -l`
 	count_watched=`cat "$HOME/.TVshowLog/"*/* | wc -l`
+	percent=$(echo "scale=2; $count_watched/$count_total" | bc)
+        percent=$(echo "scale=2; $percent*100" | bc)
 
-	echo "${RED}Statistics:${NONE}"
+	echo ""
+	echo "${RED}${BOLD}****Statistics****${NONE}"
+	echo ""
+	echo "${GREEN}Percent Watched: $percent% ${NONE}"
+	echo ""
 	echo "Total Episodes:" $count_total
 	echo "Total Episodes Watched:" $count_watched
 	echo "Episodes Unwatched:" $((count_total-count_watched))
-
+	echo ""
+	
 }
 
 # Main starts here
