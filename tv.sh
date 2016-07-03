@@ -90,17 +90,17 @@ fi
 	
 
 # ASCII CODES for foreground colours and text attributes
-NONE='\033[00m'
-RED='\033[01;31m'
-PINK='\033[0;31m'				# Might look like Red
-GREEN='\033[01;32m'				# Might Look like yellow
-YELLOW='\033[01;33m'			# Might look like Green
-PURPLE='\033[01;35m'
-CYAN='\033[01;36m'
-LIGHT_CYAN='\033[0;36m'
-WHITE='\033[01;37m'
-BOLD='\033[1m'
-UNDERLINE='\033[4m'
+NONE="$(tput sgr 0)"
+RED="$(tput setaf 1)"
+PINK="$(tput setaf 1)"				# Might look like Red
+GREEN="$(tput setaf 2)"   			# Might Look like yellow
+YELLOW="$(tput setaf 3)"			# Might look like Green
+PURPLE="$(tput setaf 5)"
+CYAN="$(tput setaf 6)"
+LIGHT_CYAN="$(tput setaf 4)"    # Blue color
+WHITE="$(tput setaf 7)"
+BOLD="$(tput bold)"
+UNDERLINE="$(tput smul)"
 
 
 clear
