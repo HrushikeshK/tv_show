@@ -15,7 +15,7 @@ The command "tv -n" or "tv --name" followed by the keyword can be used to displa
 * git
 
 ### Installation:
-* Open your terminal and type "git clone https://github.com/hrushikeshk/tv_show.git"
+* Open your terminal and type `git clone https://github.com/hrushikeshk/tv_show.git`
 * A folder with name "tv_show" will be created in which necessary files are placed.
 
 ### While running program for first time
