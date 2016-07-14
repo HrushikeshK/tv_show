@@ -263,7 +263,7 @@ done
 			cd "$(ls | grep -i $name)"
 			showSeason "$DIR/"
 			return
-		elif [ "$(ls | grep -i "$name" | wc -l )" -eq 1 ]; then 			# If more than one shows with that expression exist
+		elif [ "$(ls | grep -i "$name" | wc -l )" -gt 1 ]; then 			# If more than one shows with that expression exist
 			for i in `seq 1 $(ls | grep -i $name | wc -l)`; do
 				echo "$i. $(ls | grep -i $name | head -n $i | tail -n 1)"
 			done
@@ -274,6 +274,9 @@ done
 					cd "$DIR"
 					showSeason "$DIR/"
 					return
+				elif [ $num = 'q' ]; then
+					clear
+					exit
 				else
 					echo "Invalid Number..."
 					sleep 0.5
