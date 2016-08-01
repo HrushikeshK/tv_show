@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 readonly script_name=`basename "$0"`		# Get name of the script
 readonly relative_location=`dirname "$0"`		# To get relative path of the script, dirname command deletes last entry of the path
@@ -144,12 +144,6 @@ mountFS() {
  fi
 }
 
-### If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment the below lines
-
-# if [ $watch != '--nconfig' ]; then
-# 	mountFS		# Call this function for streaming from network
-# fi
-
  if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
  	echo "Problem Loading TV shows"
  	echo "Check whether the specified location contains TV shows and is mounted"
@@ -157,79 +151,6 @@ mountFS() {
  	exit
  fi 
 
-latestEpisodes() {
-
-	due=$1		# To get number of days before
-
-	clear
-
-	cd "$tvShow_location"
-
-	echo "${GREEN}Episodes Due $due Days:${NONE}"
-
-	for i in `seq 1 $(find . -ctime -$due -type f | grep -E "$VIDEO_FORMATS" | wc -l)`;do
-		value=`find . -ctime -$due -type f | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
-		echo "$value" > "$HOME/.TVshowLog/.temp"	# awk needs a file :(
-
-		Dir="$(awk -F"/" '{ print $2 }' "$HOME/.TVshowLog/.temp")" 
-		show="$(awk -F"/" '{ print $3 }' "$HOME/.TVshowLog/.temp")"
-		value="$(basename "$value")"
-
-		if grep -q "$value" "$HOME/.TVshowLog/$Dir/$show" ; then		# Ignore episodes that are in the log
-			continue
-		else
-			if [ $i -lt 10 ]; then
-				echo " $i. $value"			#Print Episode's number before 10
-			else
-				echo "$i. $value"
-			fi
-		fi 
-	done
-
-	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"			# deletes \n from echo so that next command is executed on same line i.e read command
-	read number
-
-	if [ $number = 'b' ] || [ $number = 'a' ]; then
-		showName
-		return
-	elif [ $number = 'q' ]; then
-		for i in T h a n k "-" Y o u; do echo -n $i; sleep 0.10; done; echo; sleep 0.2
-		clear
-		exit
-	fi
-
-	Episode="$(find . -ctime -$due -type f | grep -E "$VIDEO_FORMATS" | head -n $number | tail -n 1)"
-	echo "$Episode" > "$HOME/.TVshowLog/.temp"	# awk needs a file :(
-	Dir="$(awk -F"/" '{ print $2 }' "$HOME/.TVshowLog/.temp")" 
-	show="$(awk -F"/" '{ print $3 }' "$HOME/.TVshowLog/.temp")"
-
-
-	echo "Playing $(basename "$Episode")..."
-	vlc -f "$Episode" 2> /dev/null
-
-	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
-	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
-	read answer
-
-	if [ $answer = 'y' ]; then 
-		if grep -q "$(basename "$Episode")" "$HOME/.TVshowLog/$Dir/$show"; then	# Does not repeat the entries in log file
-			echo "$(basename "$Episode")"
-			echo "$HOME/.TVshowLog/$Dir/$show"
-			continue
-		else
-			echo "$(basename "$Episode")" >> "$HOME/.TVshowLog/$Dir/$show"			# Add the entry of the episode to watched list
-			sort "$HOME/.TVshowLog/$Dir/$show" -o "$HOME/.TVshowLog/$Dir/$show" 	# Sort log file
-			echo "Successfully set $(basename "$Episode") as watched"
-			sleep 1
-		fi
-	else
-		continue
-	fi
-
-	latestEpisodes $due
-
-
-}
 
 
 showName() {
@@ -1054,14 +975,89 @@ fi
 }
 
 
+latestEpisodes() {
+
+	due=$1		# To get number of days before
+
+	clear
+
+	cd "$tvShow_location"
+
+	echo "${GREEN}Episodes Due $due Days:${NONE}"
+
+	for i in `seq 1 $(find . -ctime -$due -type f | grep -E "$VIDEO_FORMATS" | wc -l)`;do
+		value=`find . -ctime -$due -type f | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
+		echo "$value" > "$HOME/.TVshowLog/.temp"	# awk needs a file :(
+
+		Dir="$(awk -F"/" '{ print $2 }' "$HOME/.TVshowLog/.temp")" 
+		show="$(awk -F"/" '{ print $3 }' "$HOME/.TVshowLog/.temp")"
+		value="$(basename "$value")"
+
+		if grep -q "$value" "$HOME/.TVshowLog/$Dir/$show" ; then		# Ignore episodes that are in the log
+			continue
+		else
+			if [ $i -lt 10 ]; then
+				echo " $i. $value"			#Print Episode's number before 10
+			else
+				echo "$i. $value"
+			fi
+		fi 
+	done
+
+	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"			# deletes \n from echo so that next command is executed on same line i.e read command
+	read number
+
+	if [ $number = 'b' ] || [ $number = 'a' ]; then
+		showName
+		return
+	elif [ $number = 'q' ]; then
+		for i in T h a n k "-" Y o u; do echo -n $i; sleep 0.10; done; echo; sleep 0.2
+		clear
+		exit
+	fi
+
+	Episode="$(find . -ctime -$due -type f | grep -E "$VIDEO_FORMATS" | head -n $number | tail -n 1)"
+	echo "$Episode" > "$HOME/.TVshowLog/.temp"	# awk needs a file :(
+	Dir="$(awk -F"/" '{ print $2 }' "$HOME/.TVshowLog/.temp")" 
+	show="$(awk -F"/" '{ print $3 }' "$HOME/.TVshowLog/.temp")"
+
+
+	echo "Playing $(basename "$Episode")..."
+	vlc -f "$Episode" 2> /dev/null
+
+	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
+	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
+	read answer
+
+	if [ $answer = 'y' ]; then 
+		if grep -q "$(basename "$Episode")" "$HOME/.TVshowLog/$Dir/$show"; then	# Does not repeat the entries in log file
+			echo "$(basename "$Episode")"
+			echo "$HOME/.TVshowLog/$Dir/$show"
+			continue
+		else
+			echo "$(basename "$Episode")" >> "$HOME/.TVshowLog/$Dir/$show"			# Add the entry of the episode to watched list
+			sort "$HOME/.TVshowLog/$Dir/$show" -o "$HOME/.TVshowLog/$Dir/$show" 	# Sort log file
+			echo "Successfully set $(basename "$Episode") as watched"
+			sleep 1
+		fi
+	else
+		continue
+	fi
+
+	latestEpisodes $due
+
+
+}
+
+
 getLog() {
 
 	location=$(sed -n '2p' "$HOME/.TVshowLog/.location.log")			# Location of the Tv shows
 	
 	count_total=`ls "$location/"*/* | grep -E "$VIDEO_FORMATS" | wc -l`
 	count_watched=`cat "$HOME/.TVshowLog/"*/* | wc -l`
-	percent=$(echo "scale=2; $count_watched/$count_total" | bc)
-        percent=$(echo "scale=2; $percent*100" | bc)
+	percent=$(echo "scale=2; ($count_watched/$count_total)*100" | bc )
+	
 
 	echo ""
 	echo "${RED}${BOLD}****Statistics****${NONE}"
@@ -1077,17 +1073,28 @@ getLog() {
 
 ### Execution Point
 
-if [ $# -ne 0 ]; then		# If number of parameters is not zero
+if [ $# -eq 1 ] && [ $1 = '--nconfig' ]; then
+	updateconf
+fi
+
+### If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment the below line
+
+# mountFS		# Call this function for streaming from network
+
+if [ $# -gt 0 ]; then		# If number of parameters is not zero
 	if [ $watch = '--name' 2> /dev/null ] || [ $watch = '-n' 2> /dev/null ]; then
 		showName $watch 		#function call
 	elif [ $arg2 = '-n' 2> /dev/null ]; then
 			showName $watch $name 	# If 2 parameters
 	elif [ $watch = '--latest' ]; then
-		latestEpisodes	$2	 		#statements		
+		if [ $# -ne 2 ];then
+			echo "Usage \"--latest <no_of_days>\""
+			exit
+		else
+			latestEpisodes	$2	 		#statements
+		fi		
 	elif [ $watch = '--log' ]; then
-		getLog	 	
-	elif [ $watch = '--nconfig' ]; then
-		updateconf		# function call to update lan config file		
+		getLog	 		
 	else
 		showName
 	fi
