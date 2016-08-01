@@ -1,8 +1,8 @@
 #!/bin/sh
 
-script_name=`basename "$0"`		# Get name of the script
-relative_location=`dirname "$0"`		# To get relative path of the script, dirname command deletes last entry of the path
-script_location="`( cd "$relative_location" && pwd)`"	# To get absolute path of the script
+readonly script_name=`basename "$0"`		# Get name of the script
+readonly relative_location=`dirname "$0"`		# To get relative path of the script, dirname command deletes last entry of the path
+readonly script_location="`( cd "$relative_location" && pwd)`"	# To get absolute path of the script
 
 if [ $# -ge 1 ]; then 		# If number of comments is one
 	if [ $# -eq 2 ]; then
@@ -86,19 +86,21 @@ fi
 	fi
 
 	
+### Constants
+readonly VIDEO_FORMATS="*.mp4|*.mkv|*.avi|*.m4v|*.3gp"			# Video Formats
 
 # ASCII CODES for foreground colours and text attributes
-NONE="$(tput sgr 0)"                            # Reset
-RED="$(tput setaf 1)"
-PINK="$(tput setaf 1)"				# Red
+NONE="$(tput sgr 0)"                # Reset
+RED="$(tput setaf 1)"				# Red
+PINK="$(tput setaf 1)"				# Pink
 GREEN="$(tput setaf 2)"   			# Yellow
 YELLOW="$(tput setaf 3)"			# Green
 PURPLE="$(tput setaf 5)"			# Magenta
 CYAN="$(tput setaf 6)"				# Cyan
 LIGHT_CYAN="$(tput setaf 4)"        # Blue 
-WHITE="$(tput setaf 7)"
-BOLD="$(tput bold)"
-UNDERLINE="$(tput smul)"
+WHITE="$(tput setaf 7)"				# White
+BOLD="$(tput bold)"					# Bold
+UNDERLINE="$(tput smul)"			# Underline
 
 
 clear
@@ -165,8 +167,8 @@ latestEpisodes() {
 
 	echo "${GREEN}Episodes Due $due Days:${NONE}"
 
-	for i in `seq 1 $(find . -ctime -$due -type f | grep -E '*.mkv|*.avi|*.mp4' | wc -l)`;do
-		value=`find . -ctime -$due -type f | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $i | tail -n 1`
+	for i in `seq 1 $(find . -ctime -$due -type f | grep -E "$VIDEO_FORMATS" | wc -l)`;do
+		value=`find . -ctime -$due -type f | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
 		echo "$value" > "$HOME/.TVshowLog/.temp"	# awk needs a file :(
 
 		Dir="$(awk -F"/" '{ print $2 }' "$HOME/.TVshowLog/.temp")" 
@@ -196,7 +198,7 @@ latestEpisodes() {
 		exit
 	fi
 
-	Episode="$(find . -ctime -$due -type f | grep -E '*.mkv|*.avi|*.mp4' | head -n $number | tail -n 1)"
+	Episode="$(find . -ctime -$due -type f | grep -E "$VIDEO_FORMATS" | head -n $number | tail -n 1)"
 	echo "$Episode" > "$HOME/.TVshowLog/.temp"	# awk needs a file :(
 	Dir="$(awk -F"/" '{ print $2 }' "$HOME/.TVshowLog/.temp")" 
 	show="$(awk -F"/" '{ print $3 }' "$HOME/.TVshowLog/.temp")"
@@ -599,7 +601,7 @@ Dir=$1
 			
 Season=$2
 show=$(echo "$Season" | tr -d "/")					# To remove / from the directory name so that I can use this to browse log entries
-count=$(ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | wc -l)
+count=$(ls | grep -E "$VIDEO_FORMATS" | wc -l)
 
 clear		# Command to clear screen
 
@@ -615,8 +617,8 @@ fi
 
 echo "${PINK}${BOLD} $Dir ${NONE}${YELLOW}$Season: ${NONE}" | tr -d "/"
 
-for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | wc -l)`; do 			# seq command used to get range of number of episodes
-value=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $i | tail -n 1`
+for i in `seq 1 $(ls | grep -E "$VIDEO_FORMATS" | wc -l)`; do 			# seq command used to get range of number of episodes
+value=`ls | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
 
 # FOR WATCHED EPISODES
 
@@ -670,7 +672,7 @@ elif [ $epNumber = 'quit' ] || [ $epNumber = 'q' ]; then		# Quit
 # To generate Random Episodes
 elif [ $epNumber = 'r' ]; then				# Generate Random Number
 	random=$( generateRandom $count )
-	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $random | tail -n 1`
+	Episode=`ls | grep -E "$VIDEO_FORMATS" | head -n $random | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null			#Play Random episode using vlc
 	
@@ -697,7 +699,7 @@ elif [ $epNumber -gt $count 2> /dev/null ]; then 		# If entered number is greate
 	showEpisode "$Dir" "$Season"
 	return
 elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether entered value is an integer
-	Episode=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $epNumber | tail -n 1`
+	Episode=`ls | grep -E "$VIDEO_FORMATS" | head -n $epNumber | tail -n 1`
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null				#Play episode using vlc in full screen
 
@@ -738,8 +740,8 @@ setwatchedE() {
 	Season=$2
 	show=$(echo "$Season" | tr -d "/")
 
-	for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | wc -l)`; do 			# seq command used to get range of number of episodes
-value=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $i | tail -n 1`
+	for i in `seq 1 $(ls | grep -E "$VIDEO_FORMATS" | wc -l)`; do 			# seq command used to get range of number of episodes
+value=`ls | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
 		if grep -q "$value" "$HOME/.TVshowLog/$Dir$show"; then		# Display unwatched episodes only
 			continue
 		else
@@ -764,7 +766,7 @@ if [ $epNumber = 'r' ]; then			# RANGE
 
 	# RANGE
 	while [ $i -le $secondNumber ]; do
-		Episode=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $i | tail -n 1`
+		Episode=`ls | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
 		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
 			i=$((i+1))			
 			continue
@@ -784,7 +786,7 @@ elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether 
 		sleep 1	
 		return
 	else
-		Episode=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $epNumber | tail -n 1`
+		Episode=`ls | grep -E "$VIDEO_FORMATS" | head -n $epNumber | tail -n 1`
 		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then		 # If the episode is already in the log then ignore
 			continue
 		else
@@ -848,8 +850,8 @@ if [ $seasonNumber = 'r' ]; then			# set as watched in RANGE
 	num=$((num+1))
 		cd "$Season"		#Enter the season
 
-		for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | wc -l)`; do 			# seq command used to get range of number of episodes
-			value=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $i | tail -n 1`
+		for i in `seq 1 $(ls | grep -E "$VIDEO_FORMATS" | wc -l)`; do 			# seq command used to get range of number of episodes
+			value=`ls | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
 			if grep -q "$value" "$HOME/.TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
 				continue
 			else
@@ -874,8 +876,8 @@ elif [ $seasonNumber -ne 0 -o $seasonNumber -eq 0 2> /dev/null ]; then			# Check
 		show=$(echo "$Season" | tr -d "/")
 		cd "$Season"		#Enter the season
 
-		for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | wc -l)`; do 			# seq command used to get range of number of episodes
-			value=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $i | tail -n 1`
+		for i in `seq 1 $(ls | grep -E "$VIDEO_FORMATS" | wc -l)`; do 			# seq command used to get range of number of episodes
+			value=`ls | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
 			if grep -q "$value" "$HOME/.TVshowLog/$Dir$show"; then		# If the episode is already in the log then ignore
 				continue
 			else
@@ -926,8 +928,8 @@ setwatchedT() {
 			for j in */; do
 				cd "$j" 	# Enter every Season
 				show=$(echo "$j" | tr -d "/")				# TO remove / from Season name
-				for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | wc -l)`; do 			# seq command used to get range of number of episodes
-					value=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $i | tail -n 1`
+				for i in `seq 1 $(ls | grep -E "$VIDEO_FORMATS" | wc -l)`; do 			# seq command used to get range of number of episodes
+					value=`ls | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
 					if grep -q "$value" "$HOME/.TVshowLog/$DIR$show"; then		# If the episode is already in the log then ignore
 						continue
 					else
@@ -954,7 +956,7 @@ iswatched() {
 	Season=$2
 	show=$(echo "$Season" | tr -d "/")
 
-	value=$(ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | wc -l)
+	value=$(ls | grep -E "$VIDEO_FORMATS" | wc -l)
 	if [ $(cat "$HOME/.TVshowLog/$Dir$show" | wc -l) -eq $value ]; then	# If all episodes are in the entry
 		cd ..
 		return 0
@@ -973,7 +975,7 @@ iswatchedS() {
 	for season in */; do
 		 				
 	show=$(echo "$season" | tr -d "/")
-	lines=$(ls "$season" | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | wc -l)				# Seasons in actual TV show directory
+	lines=$(ls "$season" | grep -E "$VIDEO_FORMATS" | wc -l)				# Seasons in actual TV show directory
 		if [ ! $(cat "$HOME/.TVshowLog/$Dir$show" | wc -l) -eq $lines ]; then		# compared with number of episodes in the log list
 			cd ..
 			return 1		
@@ -994,8 +996,8 @@ setunwatchedE() {
 	Season=$2
 	show=$(echo "$Season" | tr -d "/")
 
-	for i in `seq 1 $(ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | wc -l)`; do 			# seq command used to get range of number of episodes
-value=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $i | tail -n 1`
+	for i in `seq 1 $(ls | grep -E "$VIDEO_FORMATS" | wc -l)`; do 			# seq command used to get range of number of episodes
+value=`ls | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
 		if grep -q "$value" "$HOME/.TVshowLog/$Dir$show"; then		# Display unwatched episodes only
 			if [ $i -lt 10 ]; then
 				echo " $i. $value"			#Print Episodes before 10
@@ -1023,7 +1025,7 @@ if [ $epNumber = 'r' ]; then
 		return
 	fi
 	while [ $firstNumber -le $secondNumber ]; do
-		Episode=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $firstNumber | tail -n 1`
+		Episode=`ls | grep -E "$VIDEO_FORMATS" | head -n $firstNumber | tail -n 1`
 		firstNumber=$((firstNumber+1))										# increment number
 		sed -i /"$Episode"/d "$HOME/.TVshowLog/$Dir$show"				# Delete the entry from log
 		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
@@ -1039,7 +1041,7 @@ if [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether en
 		sleep 1	
 		return
 	else
-		Episode=`ls | grep -E '*.mp4|*.mkv|*.avi|*.m4v' | head -n $epNumber | tail -n 1`
+		Episode=`ls | grep -E "$VIDEO_FORMATS" | head -n $epNumber | tail -n 1`
 		sed -i /"$Episode"/d "$HOME/.TVshowLog/$Dir$show"				# Delete the entry from log
 		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Episode as UNWATCHED"
@@ -1056,7 +1058,7 @@ getLog() {
 
 	location=$(sed -n '2p' "$HOME/.TVshowLog/.location.log")			# Location of the Tv shows
 	
-	count_total=`ls "$location/"*/* | grep -E '*.mp4|*.avi|*.mkv' | wc -l`
+	count_total=`ls "$location/"*/* | grep -E "$VIDEO_FORMATS" | wc -l`
 	count_watched=`cat "$HOME/.TVshowLog/"*/* | wc -l`
 	percent=$(echo "scale=2; $count_watched/$count_total" | bc)
         percent=$(echo "scale=2; $percent*100" | bc)
@@ -1073,7 +1075,7 @@ getLog() {
 	
 }
 
-# Main starts here
+### Execution Point
 
 if [ $# -ne 0 ]; then		# If number of parameters is not zero
 	if [ $watch = '--name' 2> /dev/null ] || [ $watch = '-n' 2> /dev/null ]; then
