@@ -1056,7 +1056,8 @@ getLog() {
 	
 	count_total=`ls "$location/"*/* | grep -E "$VIDEO_FORMATS" | wc -l`
 	count_watched=`cat "$HOME/.TVshowLog/"*/* | wc -l`
-	percent=$(echo "scale=2; ($count_watched/$count_total)*100" | bc )
+	percent=$(echo $(echo "scale=4; ($count_watched/$count_total)*100" | bc ) | tr -d "00")
+		# A very bad approach of rounding off to two digits. Couldn't think of anything else
 	
 
 	echo ""
