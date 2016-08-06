@@ -22,7 +22,7 @@ if [ ! -d $HOME/.TVshowLog ]; then			# If the Log directory does not exist, then
 fi
 
 if [ ! -f $HOME/.TVshowLog/.help.txt ]; then
-	cp "tvshow_help.txt" "$HOME/.TVshowLog/.help.txt"		# Copy the help file in Log folder
+	cp "$script_location/tvshow_help.txt" "$HOME/.TVshowLog/.help.txt"		# Copy the help file in Log folder
 fi
 
 if [ $watch = '-h' 2> /dev/null ]; then			# Help Page
@@ -162,7 +162,6 @@ for tv in */; do
 	if [ ! -d "$HOME/.TVshowLog/$tv" ]; then		# If the directory doesnt exist
 		mkdir "$HOME/.TVshowLog/$tv"
 		echo "Database updated with new show named ${BOLD}$(echo $tv | tr -d "/")${NONE}"		# Update with new TV show
-		sleep 0.5
 	fi
 	cd "$tv"
 	for season in */; do 
@@ -864,6 +863,47 @@ setwatchedT() {
 			done
 			cd ..
 		fi
+		# To set tv Shows as watched in range
+	elif [ $showNumber = 'r' ]; then		
+		echo "Enter First number"
+		read firstNumber
+		if [ $firstNumber -lt 1 ]; then
+			echo "Invalid Number"
+			sleep 1
+			return
+		fi
+		echo "Enter second number"
+		read secondNumber
+		if [ $secondNumber -gt $(echo $(ls | wc -l)) ] || [ $firstNumber -gt $secondNumber ]; then
+			echo "Invalid Number"
+			sleep 1
+			return
+		fi
+
+		num=$firstNumber
+		while [ $num -le $secondNumber ]; do 				# while the last number in the range is reached
+			DIR_SHOW=`for i in */; do echo $i; done | head -n $num | tail -n 1`
+			num=$((num+1))		# increment num
+			cd "$DIR_SHOW"		#Enter particular tv show
+			
+			for DIR_SEASON in */; do
+				cd "$DIR_SEASON" 	# Enter every Season
+				
+				show=$(echo "$DIR_SEASON" | tr -d "/")				# TO remove / from Season name
+				for i in `seq 1 $(ls | grep -E "$VIDEO_FORMATS" | wc -l)`; do 			# seq command used to get range of number of episodes
+					value=`ls | grep -E "$VIDEO_FORMATS" | head -n $i | tail -n 1`
+					if grep -q "$value" "$HOME/.TVshowLog/$DIR_SHOW$show"; then		# If the episode is already in the log then ignore
+						continue
+					else
+						echo "$value" >> "$HOME/.TVshowLog/$DIR_SHOW$show"			# Else add in the log list
+					fi
+				done
+				sort "$HOME/.TVshowLog/$DIR_SHOW$show" -o "$HOME/.TVshowLog/$DIR_SHOW$show" 	# Sort the log file
+				cd ..
+			done
+			cd ..
+			echo "Successfully set $DIR_SHOW as watched"
+		done			
 	else
 		return 
 	fi
@@ -951,7 +991,6 @@ if [ $epNumber = 'r' ]; then
 		sed -i /"$Episode"/d "$HOME/.TVshowLog/$Dir$show"				# Delete the entry from log
 		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Episode as UNWATCHED"
-		sleep 0.5
 	done
 fi
 
@@ -966,7 +1005,6 @@ if [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether en
 		sed -i /"$Episode"/d "$HOME/.TVshowLog/$Dir$show"				# Delete the entry from log
 		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 		echo "Successfully set $Episode as UNWATCHED"
-		sleep 0.5
 	fi
 else
 	return 
