@@ -45,6 +45,5 @@ u - set a particular episode as unwatched
 r (after pressing u) - set a range of episodes as unwatched
 q - quit
 
-4. After selecting "s" from either Seasons section or Episodes section
-
-r - to set a range of Seasons or Episodes as watched
+4. After selecting "s(set as watched)" from any position (i.e TV show name or Season or Episodes):
+r - to set a range as watched
