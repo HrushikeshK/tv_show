@@ -26,10 +26,10 @@ The command "tv -n" or "tv --name" followed by the keyword can be used to displa
 
 #### If your tv shows are on the other device which is connected to your LAN and has ssh server running
 * You need to install sshfs utility. To install sshfs, type
-  "apt-get install sshfs" on the terminal
+  `apt-get install sshfs` on the terminal
 * You need to uncomment a few lines from the code and enter appropriate details according to your device.
 * You need to create a mount point to mount it virtually. The command sshfs is used to mount virtually.
-* For example: If your remote device is a raspberry pi with ip "192.168.1.101" and username "pi", then the complete command can look like this(example): 
+* For example: If your remote device is a Raspberry Pi with ip "192.168.1.101" and username "pi", then the complete command can look like this(example): 
   sshfs pi@192.168.1.101:"/media/pi/MY_HD/TV_shows/" "/mount_point/"
 * Don't forget to save after this.
 * You need to run the command using sudo, hence create alias accordingly.
