@@ -37,7 +37,7 @@ if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 	echo "$script_location" > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 	echo "Enter path for your TV shows directory"
-	read tvShow_location 						# Path where your TV shows are located
+	read -e tvShow_location 						# Path where your TV shows are located (-e used to autocomplete)
 	echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
 	echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 else
@@ -45,7 +45,7 @@ else
 		echo "$script_location"/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 		echo "Enter path for your TV shows directory"
-		read tvShow_location 						# Path where your TV shows are located
+		read -e tvShow_location 						# Path where your TV shows are located (-e used to autocomplete)
 		echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
 		echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 	else
