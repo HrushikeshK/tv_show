@@ -37,7 +37,7 @@ if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 	echo "$script_location" > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 	echo "Enter path for your TV shows directory"
-	read tvShow_location 						# Path where your TV shows are located
+	read -e tvShow_location 						# Path where your TV shows are located (-e used to autocomplete)
 	echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
 	echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 else
@@ -45,7 +45,7 @@ else
 		echo "$script_location"/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
 	
 		echo "Enter path for your TV shows directory"
-		read tvShow_location 						# Path where your TV shows are located
+		read -e tvShow_location 						# Path where your TV shows are located (-e used to autocomplete)
 		echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
 		echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
 	else
@@ -1094,15 +1094,14 @@ getLog() {
 	
 	count_total=`ls "$location/"*/* | grep -E "$VIDEO_FORMATS" | wc -l`
 	count_watched=`cat "$HOME/.TVshowLog/"*/* | wc -l`
-	percent=$(echo $(echo "scale=4; ($count_watched/$count_total)*100" | bc ) | tr -d "00")
-		# A very bad approach of rounding off to two digits. Couldn't think of anything else
-	
+	percent=$(echo "scale=4; ($count_watched/$count_total)*100" | bc )	
 
 	echo ""
 	echo "${RED}${BOLD}****Statistics****${NONE}"
 	echo ""
-	echo "${GREEN}Percent Watched: $percent% ${NONE}"
-	echo ""
+	echo -n "${GREEN}Percent Watched: "
+	printf "%0.2f%%\n" $percent 			# %% used to display % 
+	echo "${NONE}"
 	echo "Total Episodes:" $count_total
 	echo "Total Episodes Watched:" $count_watched
 	echo "Episodes Unwatched:" $((count_total-count_watched))
