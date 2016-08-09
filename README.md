@@ -34,5 +34,5 @@ The command "tv -n" or "tv --name" followed by the keyword can be used to displa
 * Don't forget to save after this.
 * You need to run the command using sudo, hence create alias accordingly.
 
-#### For more help, you can use "tv.sh -h" command.
+#### For more help, you can use `tv.sh -h` command.
 
