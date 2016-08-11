@@ -76,7 +76,7 @@ fi
 
 			fi
 		else 
-			echo "Download git to check for updates"
+			echo "Install git to check for updates"
 			sleep 1
 		fi
 
