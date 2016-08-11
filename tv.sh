@@ -61,9 +61,9 @@ fi
 
 	if [ $(echo "$(date +%s)") -ge $(($last_epoch+604800)) ]; then		# To check for updates after every 7 days
 		if [ -f /usr/bin/git ]; then   	# Check whether git is installed
-			echo "Do you want to check for updates?[y/n]"
+			echo "Do you want to check for updates?[Y/n]"
 			read option 
-			if [ $option = 'y' ]; then
+			if [ -z $option ] || [ $option = 'y' ] || [ $option = 'Y' ]; then
 				cd "$position"
 				git pull origin master
 				sleep 1
