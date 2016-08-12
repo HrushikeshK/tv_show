@@ -1,8 +1,17 @@
 #!/bin/bash
 
-readonly script_name=`basename "$0"`		# Get name of the script
-readonly relative_location=`dirname "$0"`		# To get relative path of the script, dirname command deletes last entry of the path
-readonly script_location="`( cd "$relative_location" && pwd)`"	# To get absolute path of the script
+if [ ! -d "$HOME/.TVshowLog" ] || [ ! -f "$HOME/.TVshowLog/.install" ]; then
+	echo "First you need to run install.sh"
+	exit
+fi
+
+script_location="`sed -n 1p "$HOME/.TVshowLog/.install"`"	# To get absolute path of the script
+source "$script_location/source.sh"			# file where some functions are written
+
+if [ ! -f "$HOME/.TVshowLog/.location.log" ] || [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3 ]; then
+	createLog		# Used to create ".location.log" file (A function call from source.sh file)
+fi
+
 
 if [ $# -ge 1 ]; then 		# If number of comments is one
 	if [ $# -eq 2 ]; then
@@ -17,139 +26,28 @@ if [ $# -ge 1 ]; then 		# If number of comments is one
 	fi
 fi
 
-if [ ! -d $HOME/.TVshowLog ]; then			# If the Log directory does not exist, then create one.
-	mkdir "$HOME/.TVshowLog"					# Needed for first time only, mostly
-fi
-
-if [ ! -f $HOME/.TVshowLog/.help.txt ]; then
-	cp "$script_location/tvshow_help.txt" "$HOME/.TVshowLog/.help.txt"		# Copy the help file in Log folder
-fi
-
 if [ $watch = '-h' 2> /dev/null ]; then			# Help Page
 	clear
 	cat "$HOME/.TVshowLog/.help.txt" | less
 	exit
 fi
 
-# GENERALISATION
-if [ ! -f "$HOME/.TVshowLog/.location.log" ]; then
 
-	echo "$script_location" > "$HOME/.TVshowLog/.location.log"					# Location of the script file
-	
-	echo "Enter path for your TV shows directory"
-	read -e tvShow_location 						# Path where your TV shows are located (-e used to autocomplete)
-	echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
-	echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
-else
-	if [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3 ]; then
-		echo "$script_location"/ > "$HOME/.TVshowLog/.location.log"					# Location of the script file
-	
-		echo "Enter path for your TV shows directory"
-		read -e tvShow_location 						# Path where your TV shows are located (-e used to autocomplete)
-		echo "$tvShow_location" >> "$HOME/.TVshowLog/.location.log"
-		echo "$(date +%s)" >> "$HOME/.TVshowLog/.location.log"		# Enter time used to check last update
-	else
-		tvShow_location=$(cat "$HOME/.TVshowLog/.location.log" | sed -n '2p') 
-	fi
-fi
+## To check Updates
 
-	position="$script_location"			# Location of the script
+checkUpdate			# A function call from source.sh file
 
-	## To check Updates
+readonly tvShow_location=$(cat "$HOME/.TVshowLog/.location.log" | sed -n '2p')		# Location where all TV shows are placed
 
-	last_epoch=$(sed -n '3p' "$HOME/.TVshowLog/.location.log")		# Get the time when it last checked for update
-
-	if [ $(echo "$(date +%s)") -ge $(($last_epoch+604800)) ]; then		# To check for updates after every 7 days
-		if [ -f /usr/bin/git ]; then   	# Check whether git is installed
-			echo "Do you want to check for updates?[Y/n]"
-			read option 
-			if [ -z $option ] || [ $option = 'y' ] || [ $option = 'Y' ]; then
-				cd "$position"
-				git pull origin master
-				sleep 1
-
-				new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
-				sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
-
-				sh "$position/$script_name" "$@" 	# Run script with previous arguments
-				exit
-
-			fi
-		else 
-			echo "Install git to check for updates"
-			sleep 1
-		fi
-
-		new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
-		sed -i s/"$last_epoch"/"$new_epoch"/ "$HOME/.TVshowLog/.location.log"	# Update last update time with new update time
-
-	fi
-
-	
-### Constants
-readonly VIDEO_FORMATS="*.mp4|*.mkv|*.avi|*.m4v|*.3gp"			# Video Formats
-
-# ASCII CODES for foreground colours and text attributes
-NONE="$(tput sgr 0)"                # Reset
-RED="$(tput setaf 1)"				# Red
-PINK="$(tput setaf 1)"				# Pink
-GREEN="$(tput setaf 2)"   			# Yellow
-YELLOW="$(tput setaf 3)"			# Green
-PURPLE="$(tput setaf 5)"			# Magenta
-CYAN="$(tput setaf 6)"				# Cyan
-LIGHT_CYAN="$(tput setaf 4)"        # Blue 
-WHITE="$(tput setaf 7)"				# White
-BOLD="$(tput bold)"					# Bold
-UNDERLINE="$(tput smul)"			# Underline
 
 
 clear
-
-updateconf() {
-	lanLog="$HOME/.TVshowLog/.lan.log"				# Address of Lan config file
- 
- 	echo "Enter IP address of remote machine"
- 	read ip
-  	echo "Enter path for the TV shows on remote machine"
- 	read remotePath
- 	echo "Enter username of remote machine"
- 	read username
-
- 	echo "$ip" > "$lanLog"				# Line 1: IP address
- 	echo "$remotePath" >> "$lanLog"		# Line 2: path of TV shows directory from remote machine
- 	echo "$username" >> "$lanLog"		# Line 3: Username of remote machine
-
- 	echo "${BOLD}Network Settings configured ${NONE}"
-}
-
-mountFS() {
-	if [ ! -f "$HOME/.TVshowLog/.lan.log" ]; then
-		updateconf			# Create a config file for network streaming
-	fi
- 	# Update variables from lan config file
- 	lanLog="$HOME/.TVshowLog/.lan.log"				# Address of Lan config file
- 	ip=`sed -n 1p "$lanLog"`
- 	remotePath=`sed -n 2p "$lanLog"`
- 	username=`sed -n 3p "$lanLog"`
-
- if ping -c 1 "$ip" | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
-	if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
-		echo "${GREEN} Mounting remote filesystem... ${NONE}"
-		sshfs "$username"@"$ip":"$remotePath" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
-	fi
- else
-		echo "${RED} ${BOLD}Problem in connection...${NONE}"
-		sleep 1
-		exit
- fi
-}
-
- if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
- 	echo "Problem Loading TV shows"
+if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
+	echo "Problem Loading TV shows"
  	echo "Check whether the specified location contains TV shows and is mounted"
  	rm "$HOME/.TVshowLog/.location.log"
  	exit
- fi 
+fi 
 
 
 
@@ -158,25 +56,12 @@ showName() {
 cd "$tvShow_location"
 
 # CHECK DATABASE
-for tv in */; do
-	if [ ! -d "$HOME/.TVshowLog/$tv" ]; then		# If the directory doesnt exist
-		mkdir "$HOME/.TVshowLog/$tv"
-		echo "Database updated with new show named ${BOLD}$(echo $tv | tr -d "/")${NONE}"		# Update with new TV show
-	fi
-	cd "$tv"
-	for season in */; do 
-		show=$(echo "$season" | tr -d "/")
-		if [ ! -f "$HOME/.TVshowLog/$tv$show" ]; then		# If the log file does not exist in the database
-			touch "$HOME/.TVshowLog/$tv$show"
-		fi
-	done
-	cd ..
-done
+checkDB			# Function call from source.sh file
 
-	clear		# Command to clear screen
+clear		# clear screen
 
 
-# The number of parameters here are not the one given by user, they are passed by the main function written below.
+### The number of parameters here are not the one given by user, they are passed by the main function written below.
 
 # If -n or --nmae parameter is passed to the program
 	if [ $# -eq 1 ]; then		# If only one argument is passed to this function
@@ -381,12 +266,10 @@ done
 
 
 	elif [ $showNumber = 'a' ] && [ $watch = '-u' 2> /dev/null ]; then			# To Shift from "show unwatched" to "show all"
-		cd "$position"				# This is required
-		sh "$position/$script_name"
+		"$script_name"			# Value of script_name is $0
 		exit
 	elif [ $showNumber = 'u' ]; then			# To watch unwatched TV shows
-		cd "$position"				# This is required
-		sh "$position/$script_name" -u 									# Call tv with "u" as argument for that
+		"$script_name" -u 				# Call tv with "u" as argument for that
 		exit
 	elif [ $showNumber = 'latest' ]; then	# To display latest episodes
 		echo "How many days due?"
@@ -1084,7 +967,6 @@ latestEpisodes() {
 
 	latestEpisodes $due
 
-
 }
 
 
@@ -1112,12 +994,12 @@ getLog() {
 ### Execution Point
 
 if [ $# -eq 1 ] && [ $1 = '--nconfig' ]; then
-	updateconf
+	updateconf		# Function call from source.sh file (To update network config)
 fi
 
 ### If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment the below line
 
-# mountFS		# Call this function for streaming from network
+# mountFS		# Call this function for streaming from network (Function call from source.sh file)
 
 if [ $# -gt 0 ]; then		# If number of parameters is not zero
 	if [ $watch = '--name' 2> /dev/null ] || [ $watch = '-n' 2> /dev/null ]; then
