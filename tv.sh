@@ -1,56 +1,5 @@
 #!/bin/bash
 
-if [ ! -d "$HOME/.TVshowLog" ] || [ ! -f "$HOME/.TVshowLog/.install" ]; then
-	echo "First you need to run install.sh"
-	exit
-fi
-
-script_location="`sed -n 1p "$HOME/.TVshowLog/.install"`"	# To get absolute path of the script
-source "$script_location/source.sh"			# file where some functions are written
-
-if [ ! -f "$HOME/.TVshowLog/.location.log" ] || [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3 ]; then
-	createLog		# Used to create ".location.log" file (A function call from source.sh file)
-fi
-
-
-if [ $# -ge 1 ]; then 		# If number of comments is one
-	if [ $# -eq 2 ]; then
-		watch=$1
-		name=$2		# The name which we have to search for 
-	elif [ $# -eq 3 ]; then
-		watch=$1
-		arg2=$2
-		name=$3
-	else 			# If only one argument is passed
- 		watch=$1
-	fi
-fi
-
-if [ $watch = '-h' 2> /dev/null ]; then			# Help Page
-	clear
-	cat "$HOME/.TVshowLog/.help.txt" | less
-	exit
-fi
-
-
-## To check Updates
-
-checkUpdate			# A function call from source.sh file
-
-readonly tvShow_location=$(cat "$HOME/.TVshowLog/.location.log" | sed -n '2p')		# Location where all TV shows are placed
-
-
-
-clear
-if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
-	echo "Problem Loading TV shows"
- 	echo "Check whether the specified location contains TV shows and is mounted"
- 	rm "$HOME/.TVshowLog/.location.log"
- 	exit
-fi 
-
-
-
 showName() {
 
 cd "$tvShow_location"
@@ -266,10 +215,12 @@ clear		# clear screen
 
 
 	elif [ $showNumber = 'a' ] && [ $watch = '-u' 2> /dev/null ]; then			# To Shift from "show unwatched" to "show all"
-		"$script_name"			# Value of script_name is $0
+		cd "$script_location"	# We need this when script_name does not have absolute location
+		./"$script_name"			# script_name
 		exit
 	elif [ $showNumber = 'u' ]; then			# To watch unwatched TV shows
-		"$script_name" -u 				# Call tv with "u" as argument for that
+		cd "$script_location"			# We need this when script_name does not have absolute location
+		./"$script_name" -u 				# Call tv with "u" as argument for that
 		exit
 	elif [ $showNumber = 'latest' ]; then	# To display latest episodes
 		echo "How many days due?"
@@ -480,10 +431,10 @@ elif [ $epNumber = 'r' ]; then				# Generate Random Number
 	vlc -f "$Episode" 2> /dev/null			#Play Random episode using vlc
 	
 	# Ask whether current episode is watched
-	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
+	echo "${GREEN}# Did you watch this episode? [Y/n] ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
-	if [ $answer = 'y' ]; then 
+	if [ -z $answer ] || [ $answer = 'y' ] || [ $answer = 'Y' ]; then 
 		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then		# Does not repeat the entries in log file
 			continue
 		else
@@ -512,10 +463,10 @@ elif [ $epNumber -ne 0 -o $epNumber -eq 0 2> /dev/null ]; then		# Check whether 
 		continue	
 	else
 		# Ask whether current episode is watched
-		echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
+		echo "${GREEN}# Did you watch this episode? [Y/n] ${NONE}"
 		echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 		read answer
-		if [ $answer = 'y' ]; then 
+		if [ -z $answer ] || [ $answer = 'y' ] || [ $answer = 'Y' ]; then 
 			echo "$Episode" >> "$HOME/.TVshowLog/$Dir$show"			# Add the entry of the episode to watched list
 			sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
 			echo "Successfully set $Episode as watched"
@@ -608,7 +559,7 @@ fi
 setwatchedS() {
 
 	Dir=$1				# TV show name
-	
+
 	echo "${GREEN}# Enter the number of the Season to set watched ${NONE}"
 	count=0
 for season in */				#Display season
@@ -663,7 +614,7 @@ if [ $seasonNumber = 'r' ]; then			# set as watched in RANGE
 		done
 
 		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
-		echo "Successfully set $Season as watched"
+		echo "Successfully set ${BOLD}$Season${NONE} as watched" | tr -d "/"
 		sleep 0.5
 		cd ..
 	done
@@ -688,7 +639,7 @@ elif [ $seasonNumber -ne 0 -o $seasonNumber -eq 0 2> /dev/null ]; then			# Check
 			fi
 		done
 		sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show" 	# Sort log file
-		echo "Successfully set $Season as watched"
+		echo "Successfully set ${BOLD}$Season${NONE} as watched" | tr -d "/"
 		cd ..
 		sleep 0.5	
 	fi
@@ -740,10 +691,11 @@ setwatchedT() {
 					fi
 				done
 				sort "$HOME/.TVshowLog/$DIR$show" -o "$HOME/.TVshowLog/$DIR$show" 	# Sort the log file
-				echo "Successfully set $DIR$j as watched"
+				
 				sleep 0.5
 				cd ..
 			done
+			echo "Successfully set ${BOLD}$DIR${NONE} as watched" | tr -d "/"
 			cd ..
 		fi
 		# To set tv Shows as watched in range
@@ -785,7 +737,7 @@ setwatchedT() {
 				cd ..
 			done
 			cd ..
-			echo "Successfully set $DIR_SHOW as watched"
+			echo "Successfully set ${BOLD}$DIR_SHOW${NONE} as watched" | tr -d "/"
 		done			
 	else
 		return 
@@ -946,11 +898,11 @@ latestEpisodes() {
 	echo "Playing $(basename "$Episode")..."
 	vlc -f "$Episode" 2> /dev/null
 
-	echo "${GREEN}# Did you watch this episode? (y/n) ${NONE}"
+	echo "${GREEN}# Did you watch this episode? [Y/n] ${NONE}"
 	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
 	read answer
 
-	if [ $answer = 'y' ]; then 
+	if [ -z $answer ] || [ $answer = 'y' ] || [ $answer = 'Y' ]; then 
 		if grep -q "$(basename "$Episode")" "$HOME/.TVshowLog/$Dir/$show"; then	# Does not repeat the entries in log file
 			echo "$(basename "$Episode")"
 			echo "$HOME/.TVshowLog/$Dir/$show"
@@ -991,7 +943,53 @@ getLog() {
 	
 }
 
-### Execution Point
+main() {
+
+if [ ! -d "$HOME/.TVshowLog" ] || [ ! -f "$HOME/.TVshowLog/.install" ]; then
+	echo "First you need to run install.sh"
+	exit
+fi
+
+script_location="`sed -n 1p "$HOME/.TVshowLog/.install"`"	# To get absolute path of the script
+source "$script_location/source.sh"			# file where some functions are written
+
+if [ ! -f "$HOME/.TVshowLog/.location.log" ] || [ $(cat "$HOME/.TVshowLog/.location.log" | wc -l) -ne 3 ]; then
+	createLog		# Used to create ".location.log" file (A function call from source.sh file)
+fi
+
+
+if [ $# -ge 1 ]; then 		# If number of comments is one
+	if [ $# -eq 2 ]; then
+		watch=$1
+		name=$2		# The name which we have to search for 
+	elif [ $# -eq 3 ]; then
+		watch=$1
+		arg2=$2
+		name=$3
+	else 			# If only one argument is passed
+ 		watch=$1
+	fi
+fi
+
+if [ $watch = '-h' 2> /dev/null ]; then			
+	clear
+	cat "$HOME/.TVshowLog/.help.txt" | less 		# Help Page
+	exit
+fi
+
+## To check Updates
+
+checkUpdate			# A function call from source.sh file
+
+readonly tvShow_location=$(cat "$HOME/.TVshowLog/.location.log" | sed -n '2p')		# Location where all TV shows are placed
+
+clear
+if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
+	echo "Problem Loading TV shows"
+ 	echo "Check whether the specified location contains TV shows and is mounted"
+ 	rm "$HOME/.TVshowLog/.location.log"
+ 	exit
+fi 
 
 if [ $# -eq 1 ] && [ $1 = '--nconfig' ]; then
 	updateconf		# Function call from source.sh file (To update network config)
@@ -1026,3 +1024,6 @@ tput sgr0		# Resets all color changes made in terminal
 exit
 
 #END
+}
+
+main "$@"
