@@ -6,8 +6,8 @@ Log_dir="$HOME/.TVshowLog" 		# Log Directory
 ## Remove link, if any ##
 
 echo "Removing link (if any)... "
-if [ -f "$Log_dir/.install" ]; then
-	link_name=`sed -n 2p "$Log_dir/.install"`		# Path where link is created	
+if [ -f "$Log_dir/.install" ] && [ $(cat "$Log_dir/.install" | wc -l) -eq 2 ]; then
+	link_name=`sed -n 2p "$Log_dir/.install"`		# name of the link	
 	sudo rm "/usr/bin/$link_name"
 	echo "link removed..."
 fi 
