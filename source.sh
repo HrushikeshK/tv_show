@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ### Constants
-readonly script_name="$0"		# Get name of the script
+readonly script_name=`basename "$0"`		# Get name of the script
 readonly relative_location=`dirname "$0"`		# To get relative path of the script, dirname command deletes last entry of the path
 readonly script_location="`( cd "$relative_location" && pwd)`"	# Get absolute path of the script
 
