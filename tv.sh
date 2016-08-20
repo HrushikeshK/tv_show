@@ -430,23 +430,26 @@ elif [ $epNumber = 'r' ]; then				# Generate Random Number
 	echo "Playing $Episode..."
 	vlc -f "$Episode" 2> /dev/null			#Play Random episode using vlc
 	
-	# Ask whether current episode is watched
-	echo "${GREEN}# Did you watch this episode? [Y/n] ${NONE}"
-	echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
-	read answer
-	if [ -z $answer ] || [ $answer = 'y' ] || [ $answer = 'Y' ]; then 
-		if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then		# Does not repeat the entries in log file
-			continue
-		else
-			echo "$Episode" >> "$HOME/.TVshowLog/$Dir$show"			# Add the entry of the episode to watched list
-			sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show"
-			echo "Successfully set $Episode as watched"
-			sleep 1
-		fi
+	if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then	# Does not repeat the entries in log file
+		continue	
 	else
-		continue
+		# Ask whether current episode is watched
+		echo "${GREEN}# Did you watch this episode? [Y/n] ${NONE}"
+		echo "${LIGHT_CYAN}>> ${NONE}" | tr -d "\n"
+		read answer
+		if [ -z $answer ] || [ $answer = 'y' ] || [ $answer = 'Y' ]; then 
+			if grep -q "$Episode" "$HOME/.TVshowLog/$Dir$show"; then		# Does not repeat the entries in log file
+				continue
+			else
+				echo "$Episode" >> "$HOME/.TVshowLog/$Dir$show"			# Add the entry of the episode to watched list
+				sort "$HOME/.TVshowLog/$Dir$show" -o "$HOME/.TVshowLog/$Dir$show"
+				echo "Successfully set $Episode as watched"
+				sleep 1
+			fi
+		else
+			continue
+		fi
 	fi
-
 elif [ $epNumber -gt $count 2> /dev/null ]; then 		# If entered number is greater than availabe options
 	echo "Enter valid number..."	
 	sleep 1	
@@ -977,6 +980,15 @@ if [ $watch = '-h' 2> /dev/null ]; then
 	exit
 fi
 
+if [ $# -eq 1 ] && [ $1 = '--nconfig' ]; then
+	updateconf		# Function call from source.sh file (To update network config)
+fi
+
+### If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment the below line
+
+# mountFS		# Call this function for streaming from network (Function call from source.sh file)
+
+
 ## To check Updates
 
 checkUpdate			# A function call from source.sh file
@@ -991,13 +1003,6 @@ if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then
  	exit
 fi 
 
-if [ $# -eq 1 ] && [ $1 = '--nconfig' ]; then
-	updateconf		# Function call from source.sh file (To update network config)
-fi
-
-### If your tv shows are on the other device which is connected to your LAN and has ssh server running then uncomment the below line
-
-# mountFS		# Call this function for streaming from network (Function call from source.sh file)
 
 if [ $# -gt 0 ]; then		# If number of parameters is not zero
 	if [ $watch = '--name' 2> /dev/null ] || [ $watch = '-n' 2> /dev/null ]; then

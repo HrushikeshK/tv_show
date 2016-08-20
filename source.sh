@@ -142,11 +142,13 @@ mountFS() {
  	ip=`sed -n 1p "$lanLog"`
  	remotePath=`sed -n 2p "$lanLog"`
  	username=`sed -n 3p "$lanLog"`
+ 	tvShow_location=$(cat "$HOME/.TVshowLog/.location.log" | sed -n '2p')		# Location where all TV shows are place
 
  if ping -c 1 "$ip" | grep -q " 0% packet loss"; then		# Check if the connection is working between the devices
 	if [ $(ls "$tvShow_location" | wc -l) -eq 0 ]; then			# Mount only if it is not already mounted
 		echo "${GREEN} Mounting remote filesystem... ${NONE}"
-		sshfs "$username"@"$ip":"$remotePath" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
+		sshfs -o nonempty "$username"@"$ip":"$remotePath" "$tvShow_location"		# Mount TV Shows' directory from your local device to your remote device
+		
 	fi
  else
 		echo "${RED} ${BOLD}Problem in connection...${NONE}"
