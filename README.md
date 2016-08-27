@@ -19,9 +19,9 @@
   TvShows/Show_name/Show_season/Extra_directory/episode.mp4
 
 #### If your tv shows are on the other device which is connected to your LAN and has ssh server running
-* You need to install sshfs utility. To install sshfs, type
+* Install sshfs utility. To install sshfs, type
   `$ apt-get install sshfs` on the terminal
-* You need to uncomment a line from the code which says `mountFS`
-* You need to create a mount point to mount it virtually. The command sshfs is used to mount virtually.
+* Uncomment a line from the code which says `mountFS`
+* Create a mount point (create a directory in your home directory. This will act as a mount point) to mount it virtually. The command sshfs is used to mount virtually.
 * For example: If your remote device is a Raspberry Pi with ip "192.168.1.101" and username "pi", then the complete command can look like this(example): 
   `sshfs pi@192.168.1.101:"/media/pi/MY_HD/TV_shows/" "/mount_point/"`
