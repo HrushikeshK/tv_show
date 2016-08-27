@@ -1,6 +1,6 @@
 #!/bin/bash
 
-Dir=$(sed -n 1p "$HOME/.TVshowLog/.location.log")		# TV_show directory
+Dir=$(sed -n 1p "$HOME/.TVshowLog/.location.log")		# tv_show directory
 Log_dir="$HOME/.TVshowLog" 		# Log Directory
 
 ## Remove link, if any ##
@@ -13,5 +13,5 @@ if [ -f "$Log_dir/.install" ] && [ $(cat "$Log_dir/.install" | wc -l) -eq 2 ]; t
 fi 
 
 echo "Removing logs..."
-sudo rm -r "$Log_dir"
-sudo rm -r "$Dir"
+rm -r "$Log_dir"
+rm -r "$Dir"
