@@ -76,8 +76,9 @@ checkUpdate() {
 			echo "Do you want to check for updates?[Y/n]"
 			read option 
 			if [ -z $option ] || [ $option = 'y' ] || [ $option = 'Y' ]; then
-				cd "$script_location"
-				git pull origin master
+				absolute_path="`sed -n 1p "$HOME/.TVshowLog/.install"`"  	# Path where the repository is cloned
+				cd "$absolute_path"
+				git pull --rebase --stat origin master
 				sleep 1
 
 				new_epoch="$(echo "$(date +%s)")"		# Get the time when update was made
