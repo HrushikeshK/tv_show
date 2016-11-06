@@ -76,7 +76,8 @@ checkUpdate() {
 			echo "Do you want to check for updates?[Y/n]"
 			read option 
 			if [ -z $option ] || [ $option = 'y' ] || [ $option = 'Y' ]; then
-				cd "$script_location"
+				absolute_path="`sed -n 1p "$HOME/.TVshowLog/.install"`"  	# Path where the repository is cloned
+				cd "$absolute_path"
 				git pull origin master
 				sleep 1
 
