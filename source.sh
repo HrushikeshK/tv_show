@@ -78,6 +78,7 @@ checkUpdate() {
 			if [ -z $option ] || [ $option = 'y' ] || [ $option = 'Y' ]; then
 				absolute_path="`sed -n 1p "$HOME/.TVshowLog/.install"`"  	# Path where the repository is cloned
 				cd "$absolute_path"
+
 				git pull --rebase --stat origin master
 				sleep 1
 
